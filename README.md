@@ -10,23 +10,34 @@ Everything is controlled from an in-game settings window on the map.
 
 Anything in the scan radius around you (25 m by default):
 
-- **Ores** - copper, tin, silver, iron, obsidian, meteorites
-- **Berries, mushrooms, crops, herbs, beehives**
-- **Dungeons** - crypts, sunken crypts, troll and bear caves, boss altars
+- **Ores** - copper, tin, silver, iron, obsidian, meteorites (also untouched
+  deposits you haven't hit with a pickaxe yet)
+- **Berries, mushrooms, herbs**
+- **Crops and seeds** - carrots, turnips, onions and their seeds, wild barley
+  and flax; anything grown and ready to pick, wild or planted
+- **Beehives** - your own hives and wild ones (the tree hives that drop the
+  queen bee) as separate kinds, each with its own icon
+- **Dungeons** - bear, troll and frost caves, crypts, sunken crypts, fuling
+  camps and more, each kind with its own switch
+- **Boss altars** - Eikthyr, Elder, Bonemass, Moder, Yagluth
 - **Structures** - ruins, stone towers, log cabins, swamp huts, stone
   circles, runestones, shipwrecks, Mistlands ruins and more (~20 kinds).
   Loose ruins made of generic building pieces are recognised as a group;
   anything a player built is never tagged.
-- **Portals** - labelled with their connection tag
+- **Portals** - labelled with just the portal's name
 - **Ships** - a live pin that follows a ship while someone sails it, and a
   "docked" pin where it was left
 
-Pins use the matching item icon (ore, berry, crop...), the enemy trophy for
-caves, or a custom icon for structures and dungeons. A pin is removed when
-its resource is gone (vein mined out, crop picked); berry bushes keep their
-pin since they regrow. A pin you delete by hand comes back the next time
-you pass by - to get rid of a whole kind of pin, switch it off in the
-settings instead.
+Pins use the matching item or building icon, the enemy or boss trophy for
+caves and boss altars, or a custom icon for structures, crypts and wild
+beehives. A pin is removed when its resource is gone (vein mined out, crop
+picked); berry bushes keep their pin since they regrow. A pin you delete by
+hand comes back the next time you pass by - to get rid of a whole kind of
+pin, switch it off in the settings instead.
+
+The mod keeps collecting even while a kind of pin (or everything) is hidden:
+what you walk past goes straight into the hidden set and shows up as soon as
+you switch it back on.
 
 ## Settings window
 
@@ -35,10 +46,18 @@ map). Press Esc once to close the window, twice to also close the map.
 
 - **Show all pins** - hide or show every pin this mod added
 - **Show pin labels** - hide or show the names under this mod's pins
+- **Replace boss icons** (off by default) - boss pins, including the ones the
+  game adds when you read a Vegvisir runestone, get the boss trophy icon
+  instead of the game's standard boss icon
 - **Scan radius** - 5 to 100 m
 - A list of categories in collapsible groups (Ores, Berries, Structures...),
   with two columns: **Pin** hides/shows the pins, **Label** hides/shows just
   their names. Each group header toggles the whole group.
+
+Boss pins the game adds from Vegvisir runestones follow the switches of their
+boss altar too - hiding them only makes them invisible, it never deletes them
+from your map. Where the game already has a boss pin, the mod doesn't add a
+second one.
 
 Hiding never deletes anything: hidden pins are remembered per world and come
 back when you turn them on again, even after restarting the game.
@@ -49,6 +68,10 @@ from the settings that silver exists before finding any. If a whole group is
 hidden, newly discovered kinds of that group start hidden too.
 
 Your own pins are never touched.
+
+**Upgrading from 0.1.0:** the single "Dungeon" switch is replaced by one per
+dungeon kind (its old setting carries over), and portal pins named
+"Portal: name" are renamed to just "name" the first time you load a world.
 
 ## Requirements
 
@@ -66,8 +89,9 @@ Your own pins are never touched.
 4. Launch the game and walk around - pins appear as you go.
 
 Settings are stored in `BepInEx\config\com.michal.valheim.autowaypoints.cfg`.
-Hidden pins and discovered categories are kept per world next to the DLL
-(`hidden_pins_<world>.json`, `discovered_<world>.json`).
+Hidden pins, discovered categories and the list of portal pins are kept per
+world next to the DLL (`hidden_pins_<world>.json`, `discovered_<world>.json`,
+`portals_<world>.json`).
 
 ## Building from source
 
