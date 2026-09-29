@@ -6,6 +6,10 @@ bushes, mushrooms, crops, herbs, beehives, dungeon entrances, world
 structures and ruins, portals and ships - each with a fitting icon and name.
 Everything is controlled from an in-game settings window on the map.
 
+> **Unofficial mod.** This is a fan-made mod, not affiliated with or endorsed by
+> Iron Gate. It marks your game as modded (the game shows this in the main menu),
+> as Iron Gate asks mod authors to do.
+
 ## What gets pinned
 
 Anything in the scan radius around you (25 m by default):

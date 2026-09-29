@@ -25,7 +25,7 @@ namespace AutoWaypoints
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "0.2.1";
+        public const string PluginVersion = "1.0.0";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -228,6 +228,9 @@ namespace AutoWaypoints
         private void Awake()
         {
             Log = Logger;
+            // Gra prosi mody o ustawienie tej flagi: w menu pojawia sie napis, ze gra jest
+            // zmodowana (Iron Gate wymaga oznaczania modow jako nieoficjalnych).
+            Game.isModded = true;
             Instance = this;
             BuildConfig();
             GUIManager.OnCustomGUIAvailable += BuildSettingsMenu;
