@@ -36,9 +36,9 @@ Anything in the scan radius around you (25 m by default):
 | **Ships** | ![](docs/icons/Ship.png) Ship / Ship (docked) | A live pin that follows a ship while someone sails it, and a docked pin where it was left |
 | **Other** | ![](docs/icons/DungeonTrader.png) Trader |  |
 
-Pins use the matching item or building icon, the enemy or boss trophy for
-caves and boss altars, or a custom icon for structures, crypts and wild
-beehives. A pin is removed when its resource is gone (vein mined out, crop
+Pins use the matching item or building icon, the trophy of whoever lives there
+for caves, camps and boss altars (coins for the trader), or a custom icon
+rendered from the game's own 3D model for structures, crypts and wild beehives. A pin is removed when its resource is gone (vein mined out, crop
 picked); berry bushes keep their pin since they regrow. A pin you delete by
 hand comes back the next time you pass by - to get rid of a whole kind of
 pin, switch it off in the settings instead.

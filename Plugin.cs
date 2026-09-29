@@ -25,7 +25,7 @@ namespace AutoWaypoints
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "1.0.2";
+        public const string PluginVersion = "1.0.3";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -86,15 +86,16 @@ namespace AutoWaypoints
             ("SunkenCrypt2", "Sunken Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
             ("SunkenCrypt3", "Sunken Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
             ("SunkenCrypt4", "Sunken Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
-            ("MountainCave01", "Frost Cave", Minimap.PinType.Icon2, null, null),
-            ("MountainCave02", "Frost Cave", Minimap.PinType.Icon2, null, null),
-            ("MountainCave03", "Frost Cave", Minimap.PinType.Icon2, null, null),
-            ("MountainCave04", "Frost Cave", Minimap.PinType.Icon2, null, null),
-            ("GoblinCamp1", "Fuling Camp", Minimap.PinType.Icon3, null, null),
-            ("GoblinCamp2", "Fuling Camp", Minimap.PinType.Icon3, null, null),
-            ("GoblinCamp3", "Fuling Camp", Minimap.PinType.Icon3, null, null),
-            ("GoblinCamp4", "Fuling Camp", Minimap.PinType.Icon3, null, null),
-            ("FireHole", "Surtling", Minimap.PinType.Icon3, null, null),
+            // Jaskinie mrozu: najbardziej charakterystyczny mieszkaniec to Cultist.
+            ("MountainCave01", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
+            ("MountainCave02", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
+            ("MountainCave03", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
+            ("MountainCave04", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
+            ("GoblinCamp1", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
+            ("GoblinCamp2", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
+            ("GoblinCamp3", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
+            ("GoblinCamp4", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
+            ("FireHole", "Surtling", Minimap.PinType.Icon3, null, "TrophySurtling"),
             // Oltarze przywolania bossow - nazwa wewnetrzna to zwykle skrot ("GDKing" = Elder).
             // Wszystkie oltarze bossow maja ikone trofeum bossa (jak Bear Cave trofeum Bjorna) -
             // jeden, spojny styl (wczesniej Bonemass/Moder mialy rendery oltarzy).
@@ -103,7 +104,8 @@ namespace AutoWaypoints
             ("Bonemass", "Bonemass' Altar", Minimap.PinType.Boss, null, "TrophyBonemass"),
             ("Dragonqueen", "Moder's Altar", Minimap.PinType.Boss, null, "TrophyDragonQueen"),
             ("GoblinKing", "Yagluth's Altar", Minimap.PinType.Boss, null, "TrophyGoblinKing"),
-            ("Vendor_BlackForest", "Trader", Minimap.PinType.Icon3, null, null),
+            // Handlarz nie ma trofeum - ikona monet (to, czym sie u niego placi).
+            ("Vendor_BlackForest", "Trader", Minimap.PinType.Icon3, null, "Coins"),
         };
         private static readonly Dictionary<int, (string DisplayName, Minimap.PinType PinType, string IconKey, string TrophyItemName)> DungeonLocationByHash =
             DungeonLocationDefs.ToDictionary(d => d.LocationName.GetStableHashCode(), d => (d.DisplayName, d.PinType, d.IconKey, d.TrophyItemName));
@@ -423,6 +425,8 @@ namespace AutoWaypoints
             {
                 var category = AddCategory(key, displayName, names, null, pinType, maxVerticalDeltaOverride: 60f);
                 category.CustomIcon = LoadEmbeddedIcon(key);
+                if (category.CustomIcon == null && StructureItemIcons.TryGetValue(key, out var iconItem))
+                    category.IconItemNameOverride = iconItem;
                 if (key == "StructRuins")
                     _looseRuinsCategory = category;
                 if (key == "StructSwampTower")
@@ -685,6 +689,13 @@ namespace AutoWaypoints
             ("StructRoadPost", "Road Post", new[] { "Mistlands_RoadPost1" }, Minimap.PinType.Icon0),
 
             ("StructInfestedTree", "Infested Tree", new[] { "InfestedTree01" }, Minimap.PinType.Icon1),
+        };
+
+        // Struktury bez wlasnego renderu - ikona przedmiotu, ktory sie tam zdobywa albo kto tam mieszka.
+        // (Model wejscia do kopalni obejmuje podziemny loch, wiec jego render wychodzi pusty.)
+        private static readonly Dictionary<string, string> StructureItemIcons = new Dictionary<string, string>
+        {
+            { "StructInfestedMine", "TrophySeeker" },
         };
 
         private ResourceCategory AddCategory(string key, string displayName, string[] exactNames, string prefix, Minimap.PinType pinType,
