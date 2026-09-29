@@ -10,27 +10,31 @@ Everything is controlled from an in-game settings window on the map.
 > Iron Gate. It marks your game as modded (the game shows this in the main menu),
 > as Iron Gate asks mod authors to do.
 
+## Screenshots
+
+![Pins added automatically while exploring](docs/map.jpg)
+
+![Settings window on the large map](docs/settings.png)
+
 ## What gets pinned
 
 Anything in the scan radius around you (25 m by default):
 
-- **Ores** - copper, tin, silver, iron, obsidian, meteorites (also untouched
-  deposits you haven't hit with a pickaxe yet)
-- **Berries, mushrooms, herbs**
-- **Crops and seeds** - carrots, turnips, onions and their seeds, wild barley
-  and flax; anything grown and ready to pick, wild or planted
-- **Beehives** - your own hives and wild ones (the tree hives that drop the
-  queen bee) as separate kinds, each with its own icon
-- **Dungeons** - bear, troll and frost caves, crypts, sunken crypts, fuling
-  camps and more, each kind with its own switch
-- **Boss altars** - Eikthyr, Elder, Bonemass, Moder, Yagluth
-- **Structures** - ruins, stone towers, log cabins, swamp huts, stone
-  circles, runestones, shipwrecks, Mistlands ruins and more (~20 kinds).
-  Loose ruins made of generic building pieces are recognised as a group;
-  anything a player built is never tagged.
-- **Portals** - labelled with just the portal's name
-- **Ships** - a live pin that follows a ship while someone sails it, and a
-  "docked" pin where it was left
+| Group | Pins (icon as shown on the map) | Notes |
+|---|---|---|
+| **Ores** | ![](docs/icons/Copper.png) Copper Ore · ![](docs/icons/Silver.png) Silver Ore · ![](docs/icons/Tin.png) Tin Ore · ![](docs/icons/Iron.png) Iron Deposit · ![](docs/icons/Obsidian.png) Obsidian · ![](docs/icons/Meteorite.png) Meteorite | Also untouched deposits you haven't hit with a pickaxe yet; the pin goes when the vein is mined out |
+| **Berries** | ![](docs/icons/Blueberry.png) Blueberries · ![](docs/icons/Cloudberry.png) Cloudberries · ![](docs/icons/Raspberry.png) Raspberries · ![](docs/icons/Lingonberry.png) Lingonberries | The pin stays after picking - bushes regrow |
+| **Mushrooms** | ![](docs/icons/MushroomCommon.png) Mushroom · ![](docs/icons/MushroomBlue.png) Blue Mushroom · ![](docs/icons/MushroomYellow.png) Yellow Mushroom · ![](docs/icons/MushroomJotunPuffs.png) Jotun Puffs · ![](docs/icons/MushroomMagecap.png) Magecap |  |
+| **Herbs** | ![](docs/icons/Thistle.png) Thistle · ![](docs/icons/Dandelion.png) Dandelion |  |
+| **Crops** | ![](docs/icons/CropCarrot.png) Carrot · ![](docs/icons/CropTurnip.png) Turnip · ![](docs/icons/CropOnion.png) Onion · ![](docs/icons/CropKale.png) Kale · ![](docs/icons/CropPoteitr.png) Poteitr · ![](docs/icons/CropBarley.png) Barley · ![](docs/icons/CropFlax.png) Flax | Anything grown and ready to pick, wild or planted |
+| **Seeds** | ![](docs/icons/SeedCarrot.png) Carrot Seeds · ![](docs/icons/SeedTurnip.png) Turnip Seeds · ![](docs/icons/SeedOnion.png) Onion Seeds | Wild seed plants - the only source before you start farming |
+| **Beehives** | ![](docs/icons/Beehive.png) Beehive (built) · ![](docs/icons/BeehiveWild.png) Wild beehive | Your own hives and wild ones (the tree hives that drop the queen bee) |
+| **Dungeons** | ![](docs/icons/DungeonBearCave.png) Bear Cave · ![](docs/icons/DungeonTrollCave.png) Troll Cave · ![](docs/icons/DungeonCrypt.png) Crypt · ![](docs/icons/DungeonSunkenCrypt.png) Sunken Crypt · ![](docs/icons/DungeonFrostCave.png) Frost Cave · ![](docs/icons/DungeonFulingCamp.png) Fuling Camp · ![](docs/icons/DungeonSurtling.png) Surtling | Each kind has its own switch |
+| **Boss altars** | ![](docs/icons/DungeonEikthyrsAltar.png) Eikthyr's Altar · ![](docs/icons/DungeonEldersAltar.png) Elder's Altar · ![](docs/icons/DungeonBonemassAltar.png) Bonemass' Altar · ![](docs/icons/DungeonModersAltar.png) Moder's Altar · ![](docs/icons/DungeonYagluthsAltar.png) Yagluth's Altar | Trophy icons with **Replace boss icons** on; otherwise the game's boss icon ![](docs/icons/BossNative.png) |
+| **Structures** | ![](docs/icons/StructRuins.png) Ruins · ![](docs/icons/StructLogCabin.png) Log Cabin · ![](docs/icons/StructWoodHouse.png) Wood House · ![](docs/icons/StructFarmVillage.png) Farm Village · ![](docs/icons/StructSwampHut.png) Swamp Hut · ![](docs/icons/StructSwampTower.png) Stone Tower Ruins · ![](docs/icons/StructHarbour.png) Harbour · ![](docs/icons/StructViaduct.png) Viaduct · ![](docs/icons/StructShipwreck.png) Shipwreck · ![](docs/icons/StructStoneCircle.png) Stone Circle · ![](docs/icons/StructWell.png) Well · ![](docs/icons/StructDolmen.png) Dolmen · ![](docs/icons/StructRunestone.png) Runestone · ![](docs/icons/StructStatues.png) Statues · ![](docs/icons/StructGiantRemains.png) Giant Remains · ![](docs/icons/StructGiantArmor.png) Giant Armor · ![](docs/icons/StructDvergrTower.png) Dvergr Tower · ![](docs/icons/StructInfestedMine.png) Infested Mine · ![](docs/icons/StructDvergrExcavation.png) Dvergr Excavation · ![](docs/icons/StructRoadPost.png) Road Post · ![](docs/icons/StructInfestedTree.png) Infested Tree | Loose ruins made of generic building pieces count too; anything a player built is never tagged |
+| **Portals** | ![](docs/icons/Portal.png) Portal | Labelled with just the portal's name |
+| **Ships** | ![](docs/icons/Ship.png) Ship / Ship (docked) | A live pin that follows a ship while someone sails it, and a docked pin where it was left |
+| **Other** | ![](docs/icons/DungeonTrader.png) Trader |  |
 
 Pins use the matching item or building icon, the enemy or boss trophy for
 caves and boss altars, or a custom icon for structures, crypts and wild
