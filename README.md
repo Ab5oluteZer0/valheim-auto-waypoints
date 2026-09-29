@@ -99,8 +99,10 @@ dungeon kind (its old setting carries over), and portal pins named
 
 Settings are stored in `BepInEx\config\com.michal.valheim.autowaypoints.cfg`.
 Hidden pins, discovered categories and the list of portal pins are kept per
-world next to the DLL (`hidden_pins_<world>.json`, `discovered_<world>.json`,
-`portals_<world>.json`).
+world in `BepInEx\config\AutoWaypoints\` (`hidden_pins_<world>.json`,
+`discovered_<world>.json`, `portals_<world>.json`), so updating the mod with a
+mod manager doesn't wipe them. Files from older versions (saved next to the
+DLL) are copied over automatically.
 
 ## Building from source
 
