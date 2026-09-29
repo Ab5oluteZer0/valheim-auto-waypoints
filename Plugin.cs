@@ -25,7 +25,7 @@ namespace AutoWaypoints
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "1.0.1";
+        public const string PluginVersion = "1.0.2";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -196,6 +196,9 @@ namespace AutoWaypoints
             public string[] LegacyPinNames;
             public string IconItemNameOverride;
             public string[] IconItemNameCandidates;
+            // Prefab obiektu w swiecie, z ktorego lupow brana jest ikona, gdy przedmiotu z
+            // IconItemNameOverride nie ma w ObjectDB (np. meteoryt).
+            public string IconWorldPrefab;
             public bool RemoveOnPicked = true;
             public float? MaxVerticalDeltaOverride;
             public Sprite CustomIcon;
@@ -317,7 +320,8 @@ namespace AutoWaypoints
             AddOreCategory("Tin", "Tin Ore", "TinOre", "$piece_deposit_tin", worldObjectName: "MineRock_Tin");
             AddOreCategory("Iron", "Iron Deposit", "IronOre", "$piece_deposit_iron");
             AddOreCategory("Obsidian", "Obsidian", "Obsidian", "$piece_deposit_obsidian");
-            AddOreCategory("Meteorite", "Meteorite", "Meteorite", "$piece_deposit_meteorite");
+            // Przedmiotu "Meteorite" nie ma w ObjectDB - ikona z lupow samego meteorytu.
+            AddOreCategory("Meteorite", "Meteorite", "Meteorite", "$piece_deposit_meteorite", iconWorldPrefab: "MineRock_Meteorite");
 
             // Krzaki jagod: NIE usuwamy pinu przy samym zebraniu jagod (odrastaja) - tylko
             // jesli krzak faktycznie zniknie (np. zniszczony). Jedyny taki wyjatek.
@@ -708,7 +712,8 @@ namespace AutoWaypoints
             return category;
         }
 
-        private void AddOreCategory(string key, string displayName, string dropItemName, string nameToken, string worldObjectName = null)
+        private void AddOreCategory(string key, string displayName, string dropItemName, string nameToken, string worldObjectName = null,
+            string iconWorldPrefab = null)
         {
             var enabled = Config.Bind("Categories", key, true, $"Auto-pin {displayName}.");
             var category = new ResourceCategory
@@ -723,6 +728,7 @@ namespace AutoWaypoints
                 // (ta sama sciezka co struktury/uprawy).
                 ExactNames = worldObjectName != null ? new HashSet<string> { worldObjectName } : null,
                 IconItemNameOverride = dropItemName,
+                IconWorldPrefab = iconWorldPrefab,
                 PinType = Minimap.PinType.Icon3,
                 Enabled = enabled,
                 ShowName = BindLabel(key, displayName)
@@ -1425,6 +1431,8 @@ namespace AutoWaypoints
                     if (icon != null)
                         break;
                 }
+                if (icon == null && category.IconWorldPrefab != null)
+                    icon = IconFromWorldPrefab(category.IconWorldPrefab);
 
                 if (icon == null)
                 {
@@ -1441,7 +1449,7 @@ namespace AutoWaypoints
 
             Log.LogInfo($"Globalny przebieg ikonek pinow: naprawiono {fixedCount} z {pins.Count}.");
             foreach (var kv in failuresByCategory)
-                Log.LogWarning($"Globalny przebieg ikonek: '{kv.Key}' nie naprawiono ({kv.Value}x) - ObjectDB.GetItemPrefab nie znalazl przedmiotu.");
+                Log.LogWarning($"Globalny przebieg ikonek: '{kv.Key}' nie naprawiono ({kv.Value}x) - brak ikony przedmiotu w ObjectDB i w lupach obiektu.");
         }
 
         // Postawiony przez gracza = Piece z niezerowym tworca; dziki ul z drzew nie ma Piece w ogole.
@@ -1641,6 +1649,14 @@ namespace AutoWaypoints
             }
 
             return null;
+        }
+
+        // Ikona z tego, co obiekt w swiecie naprawde daje - ta sama sciezka co przy znalezieniu
+        // obiektu (ResolveIcon), tylko na prefabie, bo po wczytaniu swiata obiektu moze nie byc w poblizu.
+        private static Sprite IconFromWorldPrefab(string prefabName)
+        {
+            var prefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(prefabName) : null;
+            return prefab != null ? ResolveIcon(prefab, prefab.GetComponentInChildren<Pickable>(), prefabName, out _) : null;
         }
 
         private static Sprite IconFromDropTable(DropTable table)
