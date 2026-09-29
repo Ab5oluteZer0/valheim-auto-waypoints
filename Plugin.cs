@@ -21,11 +21,11 @@ namespace AutoWaypoints
     // miedzy graczami).
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
-    public class AutoWaypointsPlugin : BaseUnityPlugin
+    public partial class AutoWaypointsPlugin : BaseUnityPlugin
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "1.0.3";
+        public const string PluginVersion = "1.0.4";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -75,10 +75,11 @@ namespace AutoWaypoints
             // "halfBurried_forestcrypt_entrance_large" - jedyny znaleziony model wejscia do
             // krypty (zwykly "DG_ForestCrypt" to pusty generator ukladu pokoi, bez geometrii).
             // Wizualnie potwierdzone przez uzytkownika jako pasujace do tego co widac w grze.
-            ("Crypt1", "Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
-            ("Crypt2", "Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
-            ("Crypt3", "Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
-            ("Crypt4", "Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
+            // "Burial Chambers" - do 1.0.3 pod nazwa "Crypt" (klucz DungeonCrypt zostaje, patrz DungeonKeyOverrides).
+            ("Crypt1", "Burial Chambers", Minimap.PinType.Icon4, "DungeonCrypt", null),
+            ("Crypt2", "Burial Chambers", Minimap.PinType.Icon4, "DungeonCrypt", null),
+            ("Crypt3", "Burial Chambers", Minimap.PinType.Icon4, "DungeonCrypt", null),
+            ("Crypt4", "Burial Chambers", Minimap.PinType.Icon4, "DungeonCrypt", null),
             // Brak dedykowanego modelu wejscia (tylko sama metalowa krata bez kamienia,
             // reszta to generyczne kawalki wnetrza) - na prosbe uzytkownika reuzywamy
             // ikony zwyklej krypty (podobny motyw: kamien + wejscie).
@@ -86,16 +87,28 @@ namespace AutoWaypoints
             ("SunkenCrypt2", "Sunken Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
             ("SunkenCrypt3", "Sunken Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
             ("SunkenCrypt4", "Sunken Crypt", Minimap.PinType.Icon4, "DungeonCrypt", null),
-            // Jaskinie mrozu: najbardziej charakterystyczny mieszkaniec to Cultist.
-            ("MountainCave01", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
-            ("MountainCave02", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
-            ("MountainCave03", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
-            ("MountainCave04", "Frost Cave", Minimap.PinType.Icon2, null, "TrophyCultist"),
+            // Jaskinie mrozu: render wejscia (MountainCave02 - jedyny wlaczony wariant w 1.0.15),
+            // przyciemniony do szaro-niebieskiego jak w grze (render nie ma shadera sniegu).
+            ("MountainCave01", "Frost Cave", Minimap.PinType.Icon2, "DungeonFrostCave", null),
+            ("MountainCave02", "Frost Cave", Minimap.PinType.Icon2, "DungeonFrostCave", null),
+            ("MountainCave03", "Frost Cave", Minimap.PinType.Icon2, "DungeonFrostCave", null),
+            ("MountainCave04", "Frost Cave", Minimap.PinType.Icon2, "DungeonFrostCave", null),
             ("GoblinCamp1", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
             ("GoblinCamp2", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
             ("GoblinCamp3", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
             ("GoblinCamp4", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
+            ("GoblinCamp2_1", "Fuling Camp", Minimap.PinType.Icon3, null, "TrophyGoblin"),
             ("FireHole", "Surtling", Minimap.PinType.Icon3, null, "TrophySurtling"),
+            // Lochy z wlasna ikona - render wejscia z modelu gry (wybrany przez uzytkownika).
+            ("Mistlands_DvergrTownEntrance1", "Infested Mine", Minimap.PinType.Icon3, "DungeonInfestedMine", null),
+            ("Mistlands_DvergrTownEntrance2", "Infested Mine", Minimap.PinType.Icon3, "DungeonInfestedMine", null),
+            ("MorgenHole1", "Winding Tunnels", Minimap.PinType.Icon2, "DungeonWindingTunnels", null),
+            ("MorgenHole2", "Winding Tunnels", Minimap.PinType.Icon2, "DungeonWindingTunnels", null),
+            ("MorgenHole3", "Winding Tunnels", Minimap.PinType.Icon2, "DungeonWindingTunnels", null),
+            ("MorkBorg", "Morkhalla", Minimap.PinType.Icon2, "DungeonMorkhalla", null),
+            ("Hildir_crypt", "Smouldering Tomb", Minimap.PinType.Icon4, "DungeonSmoulderingTomb", null),
+            ("Hildir_cave", "Howling Cavern", Minimap.PinType.Icon2, "DungeonHowlingCavern", null),
+            ("Hildir_plainsfortress", "Sealed Tower", Minimap.PinType.Icon3, "DungeonSealedTower", null),
             // Oltarze przywolania bossow - nazwa wewnetrzna to zwykle skrot ("GDKing" = Elder).
             // Wszystkie oltarze bossow maja ikone trofeum bossa (jak Bear Cave trofeum Bjorna) -
             // jeden, spojny styl (wczesniej Bonemass/Moder mialy rendery oltarzy).
@@ -104,9 +117,20 @@ namespace AutoWaypoints
             ("Bonemass", "Bonemass' Altar", Minimap.PinType.Boss, null, "TrophyBonemass"),
             ("Dragonqueen", "Moder's Altar", Minimap.PinType.Boss, null, "TrophyDragonQueen"),
             ("GoblinKing", "Yagluth's Altar", Minimap.PinType.Boss, null, "TrophyGoblinKing"),
+            ("Mistlands_DvergrBossEntrance1", "Infested Citadel", Minimap.PinType.Boss, "DungeonInfestedCitadel", null),
+            ("FaderLocation", "Fader's Altar", Minimap.PinType.Boss, "DungeonFadersAltar", null),
+            ("DN_Bossroom", "Deep North Boss", Minimap.PinType.Boss, "DungeonDeepNorthBoss", null),
             // Handlarz nie ma trofeum - ikona monet (to, czym sie u niego placi).
             ("Vendor_BlackForest", "Trader", Minimap.PinType.Icon3, null, "Coins"),
+            ("Hildir_camp", "Hildir's Camp", Minimap.PinType.Icon3, "DungeonHildirsCamp", null),
+            ("BogWitch_Camp", "Bog Witch Camp", Minimap.PinType.Icon3, "DungeonBogWitchCamp", null),
         };
+        // Handlarze trafiaja do grupy "Other", a nie "Dungeons".
+        private static readonly HashSet<string> TraderLocations = new HashSet<string> { "Vendor_BlackForest", "Hildir_camp", "BogWitch_Camp" };
+        // Stale klucze kategorii po zmianie nazwy wyswietlanej (ustawienia, odkrycia i ukryte piny zostaja).
+        private static readonly Dictionary<string, string> DungeonKeyOverrides = new Dictionary<string, string> { { "Burial Chambers", "DungeonCrypt" } };
+        // Dawne nazwy pinow lochow po zmianie nazwy.
+        private static readonly Dictionary<string, string[]> DungeonLegacyPinNames = new Dictionary<string, string[]> { { "Burial Chambers", new[] { "Crypt" } } };
         private static readonly Dictionary<int, (string DisplayName, Minimap.PinType PinType, string IconKey, string TrophyItemName)> DungeonLocationByHash =
             DungeonLocationDefs.ToDictionary(d => d.LocationName.GetStableHashCode(), d => (d.DisplayName, d.PinType, d.IconKey, d.TrophyItemName));
 
@@ -171,6 +195,7 @@ namespace AutoWaypoints
 
         private float _scanTimer;
         private bool _globalIconPassDone;
+        private string _session;
 
         private const float ShipUpdateInterval = 0.3f;
         private float _shipUpdateTimer;
@@ -196,6 +221,15 @@ namespace AutoWaypoints
             public string IconPiecePrefab;
             // Dawne nazwy pinow tej kategorii (sprzed podzialu) - przejmowane i przemianowywane.
             public string[] LegacyPinNames;
+            // Lokacje gry (prefaby ZoneSystem) tej kategorii - rozpoznawanie przez LocationProxy
+            // i przypisywanie dawnych pinow po pozycji.
+            public HashSet<string> LocationPrefabs;
+            // Ikony wariantow, ktore wygladaja inaczej niz reszta kategorii (lokacja -> ikona);
+            // pliki Icons/<Key>__<lokacja>.png. Pozostale warianty maja CustomIcon.
+            public Dictionary<string, Sprite> VariantIcons;
+            // Zloza rozrozniane po prefabie, gdy kilka daje ten sam surowiec (meteoryt i zloze
+            // flametalu w lawie maja ten sam m_name i te sama rude).
+            public HashSet<string> OrePrefabNames;
             public string IconItemNameOverride;
             public string[] IconItemNameCandidates;
             // Prefab obiektu w swiecie, z ktorego lupow brana jest ikona, gdy przedmiotu z
@@ -238,6 +272,7 @@ namespace AutoWaypoints
             Game.isModded = true;
             Instance = this;
             BuildConfig();
+            SetUpCharacterSettings();
             GUIManager.OnCustomGUIAvailable += BuildSettingsMenu;
             _harmony = new Harmony(PluginGUID);
             _harmony.PatchAll(typeof(AutoWaypointsPlugin).Assembly);
@@ -304,12 +339,15 @@ namespace AutoWaypoints
                 "On: boss pins - both this mod's altar pins and the game's own boss pins from Vegvisir runestones - use this mod's icons (trophies/altar renders). Off: all of them use the game's standard boss icon. Either way the mod's altar pin steps aside where the game already has a pin for that boss.");
             _replaceBossAltars.SettingChanged += (_, _) =>
             {
+                if (_applyingCharacterSettings) // przebieg ikon i tak idzie od nowa po zmianie postaci
+                    return;
                 // Poprzednia wersja tej opcji chowala oltarze z moda - przywraca je, jesli leza w schowanych.
                 foreach (var category in _categories.Where(c => c.MenuGroup == BossAltarsGroup))
                     SetCategoryVisibility(category, IsCategoryVisible(category));
                 ReapplyAllKnownPinIcons();
                 RequestPinUpdate();
             };
+            BindLocationIconsConfig();
 
             // Ruda: MineRock/MineRock5 maja kolidery na oderwanych, technicznie nazwanych
             // fragmentach (np. "MineRock5 m_meshFilter") - dopasowanie po nazwie obiektu w
@@ -322,8 +360,12 @@ namespace AutoWaypoints
             AddOreCategory("Tin", "Tin Ore", "TinOre", "$piece_deposit_tin", worldObjectName: "MineRock_Tin");
             AddOreCategory("Iron", "Iron Deposit", "IronOre", "$piece_deposit_iron");
             AddOreCategory("Obsidian", "Obsidian", "Obsidian", "$piece_deposit_obsidian");
-            // Przedmiotu "Meteorite" nie ma w ObjectDB - ikona z lupow samego meteorytu.
-            AddOreCategory("Meteorite", "Meteorite", "Meteorite", "$piece_deposit_meteorite", iconWorldPrefab: "MineRock_Meteorite");
+            // Meteoryt i zloze flametalu w lawie (Ashlands) maja ten sam m_name ("$item_flametalore")
+            // i te sama rude (FlametalOreNew) - rozrozniane po prefabie (dane z gry, 1.0.15).
+            AddOreCategory("Meteorite", "Meteorite", "FlametalOreNew", "$item_flametalore",
+                iconWorldPrefab: "MineRock_Meteorite", orePrefabs: new[] { "MineRock_Meteorite" });
+            AddOreCategory("FlametalDeposit", "Flametal Deposit", "FlametalOreNew", "$item_flametalore",
+                orePrefabs: new[] { "LeviathanLava" });
 
             // Krzaki jagod: NIE usuwamy pinu przy samym zebraniu jagod (odrastaja) - tylko
             // jesli krzak faktycznie zniknie (np. zniszczony). Jedyny taki wyjatek.
@@ -335,6 +377,8 @@ namespace AutoWaypoints
             AddCategory("Cloudberry", "Cloudberries", new[] { "CloudberryBush" }, null, Minimap.PinType.Icon1, "Cloudberry", removeOnPicked: false);
             AddCategory("Raspberry", "Raspberries", new[] { "RaspberryBush" }, null, Minimap.PinType.Icon1, "Raspberry", removeOnPicked: false);
             AddCategory("Lingonberry", "Lingonberries", new[] { "LingonberryBush" }, null, Minimap.PinType.Icon1, "Lingonberry", removeOnPicked: false);
+            // Winorosl z Ashlands (zielona i popielna odmiana) - odrasta jak krzak jagod.
+            AddCategory("Vineberry", "Vineberries", new[] { "VineGreen", "VineAsh" }, null, Minimap.PinType.Icon1, "Vineberry", removeOnPicked: false);
 
             // Grzyby: rozbite na osobne kategorie (jak jagody/warzywa) zeby kazda odmiana miala
             // wlasna, precyzyjna ikone od razu przy starcie (globalny przebieg), nie tylko po
@@ -349,6 +393,7 @@ namespace AutoWaypoints
                 iconItemNameCandidates: new[] { "JotunPuffs", "MushroomJotunPuffs" });
             AddCategory("MushroomMagecap", "Magecap", new[] { "Pickable_Mushroom_Magecap" }, null, Minimap.PinType.Icon1,
                 iconItemNameCandidates: new[] { "Magecap", "MushroomMagecap" });
+            AddCategory("MushroomSmokePuff", "Smoke Puff", new[] { "Pickable_SmokePuff" }, null, Minimap.PinType.Icon1, "MushroomSmokePuff");
             // Lochy: obiekt w swiecie nazywa sie "LocationProxy" (nie "DG_..." - to tylko
             // nazwy wewnetrznych prefabow lokacji, zapisanych jako hash w ZDO, nie w nazwie
             // obiektu na zewnatrz) - dopasowanie odbywa sie w osobnej galezi w ScanNearby.
@@ -360,12 +405,16 @@ namespace AutoWaypoints
             foreach (var displayName in DungeonLocationDefs.Select(d => d.DisplayName).Distinct())
             {
                 var def = DungeonLocationDefs.First(d => d.DisplayName == displayName);
-                string key = "Dungeon" + new string(displayName.Where(char.IsLetterOrDigit).ToArray());
+                if (!DungeonKeyOverrides.TryGetValue(displayName, out string key))
+                    key = "Dungeon" + new string(displayName.Where(char.IsLetterOrDigit).ToArray());
                 var category = AddCategory(key, displayName, null, null, def.PinType, maxVerticalDeltaOverride: 60f,
                     defaultEnabled: legacyDungeonEnabled, defaultShowName: legacyDungeonLabel);
                 category.MenuGroup = def.PinType == Minimap.PinType.Boss ? BossAltarsGroup
-                    : def.LocationName.StartsWith("Vendor", StringComparison.Ordinal) ? "Other"
+                    : TraderLocations.Contains(def.LocationName) ? "Other"
                     : "Dungeons";
+                category.LocationPrefabs = new HashSet<string>(DungeonLocationDefs.Where(d => d.DisplayName == displayName).Select(d => d.LocationName));
+                if (DungeonLegacyPinNames.TryGetValue(displayName, out var legacyNames))
+                    category.LegacyPinNames = legacyNames;
                 _dungeonCategoriesByName[displayName] = category;
             }
             AddCategory("CropCarrot", "Carrot", new[] { "Pickable_Carrot" }, null, Minimap.PinType.Icon1, "Carrot");
@@ -385,15 +434,24 @@ namespace AutoWaypoints
             wildHive.PlayerBuilt = false;
             wildHive.CustomIcon = LoadEmbeddedIcon("BeehiveWild");
             wildHive.LegacyPinNames = new[] { "Beehive" };
+            // Jajo smoka (do przywolania Moder) w gniezdzie w gorach to Pickable (nie przedmiot
+            // "DragonEgg") - pin znika, gdy ktos je podniesie.
+            AddCategory("DragonEgg", "Dragon Egg", new[] { "Pickable_DragonEgg" }, null, Minimap.PinType.Icon3, "DragonEgg");
             AddCategory("Thistle", "Thistle", new[] { "Pickable_Thistle" }, null, Minimap.PinType.Icon1, "Thistle");
             AddCategory("Dandelion", "Dandelion", new[] { "Pickable_Dandelion" }, null, Minimap.PinType.Icon1, "Dandelion");
+            AddCategory("Fiddlehead", "Fiddlehead", new[] { "Pickable_Fiddlehead" }, null, Minimap.PinType.Icon1, "Fiddleheadfern");
             // Dzikie nasiona (Czarny Las / Bagna / Gory) i dzikie zboza z Rownin - jedyne zrodlo
             // tych roslin, zanim gracz zacznie je uprawiac. Nazwy prefabow potwierdzone w plikach gry.
             AddCategory("SeedCarrot", "Carrot Seeds", new[] { "Pickable_SeedCarrot" }, null, Minimap.PinType.Icon1, "CarrotSeeds");
             AddCategory("SeedTurnip", "Turnip Seeds", new[] { "Pickable_SeedTurnip" }, null, Minimap.PinType.Icon1, "TurnipSeeds");
             AddCategory("SeedOnion", "Onion Seeds", new[] { "Pickable_SeedOnion" }, null, Minimap.PinType.Icon1, "OnionSeeds");
-            AddCategory("CropBarley", "Barley", new[] { "Pickable_Barley_Wild" }, null, Minimap.PinType.Icon1, "Barley");
-            AddCategory("CropFlax", "Flax", new[] { "Pickable_Flax_Wild" }, null, Minimap.PinType.Icon1, "Flax");
+            AddCategory("SeedKale", "Kale Seeds", new[] { "Pickable_SeedKale" }, null, Minimap.PinType.Icon1, "KaleSeeds");
+            // Tylko dzikie zboza (zasiane przez gracza to inne prefaby) - do 1.0.3 pod nazwa
+            // "Barley"/"Flax"; stare piny przejmuje kategoria, gdy gracz przejdzie obok.
+            AddCategory("CropBarley", "Wild Barley", new[] { "Pickable_Barley_Wild" }, null, Minimap.PinType.Icon1, "Barley")
+                .LegacyPinNames = new[] { "Barley" };
+            AddCategory("CropFlax", "Wild Flax", new[] { "Pickable_Flax_Wild" }, null, Minimap.PinType.Icon1, "Flax")
+                .LegacyPinNames = new[] { "Flax" };
 
             _shipsEnabled = Config.Bind("Categories", "Ships", true,
                 "Show a live pin for ships currently being sailed (by anyone). The pin follows the ship while sailed.");
@@ -414,19 +472,36 @@ namespace AutoWaypoints
                 SetCategoryVisibility(_portalCategory, IsCategoryVisible(_portalCategory));
 
             // Struktury/POI: statyczne obiekty dekoracyjne generowane przy tworzeniu swiata
-            // (ruiny, wioski Dvergr, kamienne kregi, wraki itd.) - w przeciwienstwie do lochow
-            // to NIE sa LocationProxy z ukrytym hashem, tylko wprost nazwane prefaby w swiecie,
-            // wiec dopasowanie po nazwie dziala od razu. Lista nazw zweryfikowana na podstawie
-            // open-source moda "AMPED - Auto Map Pins Enhanced" (github.com/raziell74) -
-            // nazwy moga byc nieaktualne dla tej wersji gry, [DIAG] w logu to zweryfikuje.
+            // (ruiny, wioski Dvergr, kamienne kregi, wraki itd.). Gra stawia KAZDA lokacje przez
+            // LocationProxy (ZoneSystem.SpawnLocation -> CreateLocationProxy), wiec rozpoznajemy je
+            // po hashu lokacji w ZDO (StructureByLocationHash), a dodatkowo po nazwie obiektu -
+            // czesc nazw to samodzielne obiekty swiata (np. luzne ruiny). Nazwy lokacji
+            // sprawdzone ze zrzutem ZoneSystem.m_locations tej wersji gry (1.0.15).
             // Hojna tolerancja pionowa jak dla Dungeon - to statyczne, widoczne struktury,
             // wiec nie ma ryzyka "oszukiwania" przez wykrywanie czegos niedostepnego.
+            bool legacyFarmVillageEnabled = TakeLegacySetting("Categories", LegacyFarmVillageKey);
+            bool legacyFarmVillageLabel = TakeLegacySetting("Labels", LegacyFarmVillageKey);
+            // Infested Mine byl do 1.0.3 struktura (nigdy nie dzialal - to loch), teraz jest lochem.
+            TakeLegacySetting("Categories", "StructInfestedMine");
+            TakeLegacySetting("Labels", "StructInfestedMine");
             foreach (var (key, displayName, names, pinType) in StructureDefinitions)
             {
-                var category = AddCategory(key, displayName, names, null, pinType, maxVerticalDeltaOverride: 60f);
+                bool fromFarmVillage = key == "StructDraugrVillage" || key == "StructAbandonedFarm";
+                var category = AddCategory(key, displayName, names, null, pinType, maxVerticalDeltaOverride: 60f,
+                    defaultEnabled: !fromFarmVillage || legacyFarmVillageEnabled,
+                    defaultShowName: !fromFarmVillage || legacyFarmVillageLabel);
+                if (fromFarmVillage)
+                    category.LegacyPinNames = new[] { LegacyFarmVillageName };
+                category.LocationPrefabs = new HashSet<string>(names);
+                foreach (var name in names)
+                {
+                    _structureByLocationHash[name.GetStableHashCode()] = category;
+                    _locationNameByHash[name.GetStableHashCode()] = name;
+                    var variantIcon = LoadEmbeddedIcon($"{key}__{name}");
+                    if (variantIcon != null)
+                        (category.VariantIcons ??= new Dictionary<string, Sprite>())[name] = variantIcon;
+                }
                 category.CustomIcon = LoadEmbeddedIcon(key);
-                if (category.CustomIcon == null && StructureItemIcons.TryGetValue(key, out var iconItem))
-                    category.IconItemNameOverride = iconItem;
                 if (key == "StructRuins")
                     _looseRuinsCategory = category;
                 if (key == "StructSwampTower")
@@ -636,39 +711,56 @@ namespace AutoWaypoints
         // Kategorie bez pasujacego renderu zostaja przy wbudowanej ikonie danego PinType.
         private static readonly (string Key, string DisplayName, string[] Names, Minimap.PinType PinType)[] StructureDefinitions =
         {
-            ("StructRuins", "Ruins", new[] { "StoneHouse3", "StoneHouse4", "Ruin1", "Ruin2" }, Minimap.PinType.Icon2),
+            ("StructRuins", "Ruins", new[]
+            {
+                "StoneHouse3", "StoneHouse4", "Ruin1", "Ruin2", "Ruin3", "StoneHouse1_heath", "StoneHouse2_heath", "StoneHouse5_heath"
+            }, Minimap.PinType.Icon2),
             ("StructLogCabin", "Log Cabin", new[] { "AbandonedLogCabin02", "AbandonedLogCabin03", "AbandonedLogCabin04" }, Minimap.PinType.Icon2),
             ("StructWoodHouse", "Wood House", new[]
             {
                 "WoodHouse1", "WoodHouse2", "WoodHouse3", "WoodHouse4", "WoodHouse5", "WoodHouse6",
                 "WoodHouse7", "WoodHouse8", "WoodHouse9", "WoodHouse10", "WoodHouse11", "WoodHouse12", "WoodHouse13"
             }, Minimap.PinType.Icon2),
-            ("StructFarmVillage", "Farm Village", new[] { "WoodFarm1", "WoodVillage1" }, Minimap.PinType.Icon2),
-            ("StructSwampHut", "Swamp Hut", new[] { "SwampHut1", "SwampHut2", "SwampHut3", "SwampHut4", "SwampHut5" }, Minimap.PinType.Icon2),
+            // Do 1.0.3 jedna kategoria "Farm Village" (StructFarmVillage) - to dwa rozne miejsca:
+            // wioska draugrow i opuszczona farma z dzikami (sprawdzone w pomieszczeniach DungeonDB).
+            ("StructDraugrVillage", "Draugr Village", new[] { "WoodVillage1", "WoodVillage2" }, Minimap.PinType.Icon2),
+            ("StructAbandonedFarm", "Abandoned Farm", new[] { "WoodFarm1" }, Minimap.PinType.Icon2),
+            ("StructSwampHut", "Swamp Hut", new[]
+            {
+                "SwampHut1", "SwampHut2", "SwampHut3", "SwampHut4", "SwampHut5", "SwampHut1_1", "SwampHut2_1", "SwampHut3_1"
+            }, Minimap.PinType.Icon2),
             // "SwampRuin1/2" nie istnieje w tej wersji gry (potwierdzone: brak takiego pliku
             // wsrod modeli lokacji wyciagnietych z wlasnych plikow gry). Ta sama, ciemna kamienna
             // wieza-ruina wystepuje pod nazwa "StoneTowerRuins0X" w biomach BlackForest i Mountains
             // (nie w Swamp) - potwierdzone wizualnie przez zrzut ekranu uzytkownika.
             ("StructSwampTower", "Stone Tower Ruins", new[]
             {
-                "StoneTowerRuins05_leet", "StoneTowerRuins07", "StoneTowerRuins08_sunk", "StoneTowerRuins10_sunk"
+                "StoneTowerRuins05_leet", "StoneTowerRuins07", "StoneTowerRuins08_sunk", "StoneTowerRuins10_sunk",
+                "StoneTowerRuins03", "StoneTowerRuins04", "StoneTowerRuins05", "StoneTowerRuins07_sunk",
+                "StoneTowerRuins08", "StoneTowerRuins09", "StoneTowerRuins09_sunk", "StoneTowerRuins10"
             }, Minimap.PinType.Icon2),
             ("StructHarbour", "Harbour", new[] { "Mistlands_Harbour1" }, Minimap.PinType.Icon2),
             ("StructViaduct", "Viaduct", new[] { "Mistlands_Viaduct1", "Mistlands_Viaduct2" }, Minimap.PinType.Icon2),
-            ("StructShipwreck", "Shipwreck", new[] { "ShipWreck01", "ShipWreck02", "ShipWreck03", "ShipWreck04" }, Minimap.PinType.Icon2),
+            ("StructShipwreck", "Shipwreck", new[]
+            {
+                "ShipWreck01", "ShipWreck02", "ShipWreck03", "ShipWreck04", "ShipWreck01_DN", "ShipWreck02_DN"
+            }, Minimap.PinType.Icon2),
 
             // "StoneCircle" nie istnieje w tej wersji gry (potwierdzone: brak takiego pliku
             // wsrod modeli lokacji wyciagnietych z wlasnych plikow gry) - realna nazwa to
             // StoneHenge3/5 (znalezione w biomie Heath). Moze byc wiecej wariantow (1,2,4) -
             // [DIAG] w logu to pokaze przy nastepnym podejsciu.
-            ("StructStoneCircle", "Stone Circle", new[] { "StoneHenge3", "StoneHenge5" }, Minimap.PinType.Icon4),
+            ("StructStoneCircle", "Stone Circle", new[]
+            {
+                "StoneHenge3", "StoneHenge5", "StoneHenge1", "StoneHenge2", "StoneHenge4", "StoneHenge6"
+            }, Minimap.PinType.Icon4),
             ("StructWell", "Well", new[] { "MountainWell1" }, Minimap.PinType.Icon4),
             ("StructDolmen", "Dolmen", new[] { "Dolmen01", "Dolmen02", "Dolmen03" }, Minimap.PinType.Icon4),
             ("StructRunestone", "Runestone", new[]
             {
                 "Runestone_Greydwarfs", "Runestone_Draugr", "DrakeLorestone", "Runestone_Boars",
                 "Runestone_BlackForest", "Runestone_Mistlands", "Runestone_Meadows", "Runestone_Swamps",
-                "Runestone_Mountains", "Runestone_Plains"
+                "Runestone_Mountains", "Runestone_Plains", "Runestone_Ashlands", "Runestone_DeepNorth"
             }, Minimap.PinType.Icon4),
             ("StructStatues", "Statues", new[] { "Mistlands_Statue1", "Mistlands_Statue2", "Mistlands_StatueGroup1", "Mistlands_RockSpire1" }, Minimap.PinType.Icon4),
 
@@ -684,19 +776,72 @@ namespace AutoWaypoints
                 "Mistlands_GuardTower1_ruined_new2", "Mistlands_GuardTower3_new", "Mistlands_GuardTower3_ruined_new",
                 "Mistlands_GuardTower1_new", "Mistlands_GuardTower2_new", "Mistlands_GuardTower1_ruined_new", "Mistlands_Lighthouse1_new"
             }, Minimap.PinType.Icon0),
-            ("StructInfestedMine", "Infested Mine", new[] { "Mistlands_DvergrTownEntrance1", "Mistlands_DvergrTownEntrance2" }, Minimap.PinType.Icon0),
             ("StructDvergrExcavation", "Dvergr Excavation", new[] { "Mistlands_Excavation1", "Mistlands_Excavation2", "Mistlands_Excavation3" }, Minimap.PinType.Icon0),
             ("StructRoadPost", "Road Post", new[] { "Mistlands_RoadPost1" }, Minimap.PinType.Icon0),
 
             ("StructInfestedTree", "Infested Tree", new[] { "InfestedTree01" }, Minimap.PinType.Icon1),
+
+            // 1.0.4: miejsca, ktorych mod wczesniej nie znal (porownanie ze zrzutem lokacji gry).
+            // Laki, Czarny Las, Bagna, Gory, Rowniny
+            ("StructSacrificialStones", "Sacrificial Stones", new[] { "StartTemple" }, Minimap.PinType.Icon4),
+            ("StructCombatRuin", "Combat Ruin", new[] { "CombatRuin01" }, Minimap.PinType.Icon2),
+            ("StructStoneShip", "Stone Ship", new[] { "ShipSetting01", "ShipSetting02", "ShipSetting03" }, Minimap.PinType.Icon4),
+            ("StructGreydwarfCamp", "Greydwarf Camp", new[] { "Greydwarf_camp1" }, Minimap.PinType.Icon3),
+            ("StructBigRockClearing", "Big Rock Clearing", new[] { "BigRockClearing" }, Minimap.PinType.Icon4),
+            ("StructDraugrGrave", "Draugr Grave", new[] { "Grave1" }, Minimap.PinType.Icon3),
+            ("StructSwampRuin", "Swamp Ruin", new[] { "SwampRuin1", "SwampRuin2" }, Minimap.PinType.Icon2),
+            ("StructSwampWell", "Swamp Well", new[] { "SwampWell1" }, Minimap.PinType.Icon4),
+            ("StructDragonNest", "Dragon Nest", new[] { "DrakeNest01" }, Minimap.PinType.Icon3),
+            ("StructMountainGrave", "Mountain Grave", new[] { "MountainGrave01" }, Minimap.PinType.Icon4),
+            ("StructWaymarker", "Waymarker", new[] { "Waymarker01", "Waymarker02" }, Minimap.PinType.Icon4),
+            ("StructAncientUpgradeStation", "Ancient Upgrade Station", new[] { "AncientUpgradeStation" }, Minimap.PinType.Icon4),
+            ("StructFulingTower", "Fuling Tower", new[] { "StoneTower1", "StoneTower3" }, Minimap.PinType.Icon3),
+            ("StructFulingHut", "Fuling Hut", new[] { "GoblinHut01", "GoblinHut02", "GoblinHut03" }, Minimap.PinType.Icon3),
+            ("StructTarPit", "Tar Pit", new[] { "TarPit1", "TarPit2", "TarPit3", "TarPit1_1", "TarPit2_1", "TarPit3_1" }, Minimap.PinType.Icon3),
+            // Popielne Krainy
+            ("StructCharredFortress", "Charred Fortress", new[] { "CharredFortress" }, Minimap.PinType.Icon3),
+            ("StructFortressRuins", "Fortress Ruins", new[] { "FortressRuins" }, Minimap.PinType.Icon2),
+            ("StructAshlandRuins", "Ashland Ruins", new[] { "AshlandRuins" }, Minimap.PinType.Icon2),
+            ("StructCharredRuins", "Charred Ruins", new[] { "CharredRuins1", "CharredRuins2", "CharredRuins3", "CharredRuins4" }, Minimap.PinType.Icon2),
+            ("StructCharredTowerRuins", "Charred Tower Ruins", new[] { "CharredTowerRuins1", "CharredTowerRuins2", "CharredTowerRuins3" }, Minimap.PinType.Icon2),
+            ("StructDvergrTowerRuins", "Dvergr Tower Ruins", new[] { "CharredTowerRuins1_dvergr" }, Minimap.PinType.Icon2),
+            ("StructPlaceOfMystery", "Place of Mystery", new[] { "PlaceofMystery1", "PlaceofMystery2", "PlaceofMystery3" }, Minimap.PinType.Icon4),
+            ("StructCharredStones", "Charred Stones", new[] { "CharredStone_Spawner" }, Minimap.PinType.Icon3),
+            ("StructSulfurArch", "Sulfur Arch", new[] { "SulfurArch" }, Minimap.PinType.Icon4),
+            ("StructVoltureNest", "Volture Nest", new[] { "VoltureNest" }, Minimap.PinType.Icon3),
+            // Gleboka Polnoc
+            ("StructNorthVillage", "North Village", new[] { "NorthVillage" }, Minimap.PinType.Icon2),
+            ("StructFrozenShip", "Frozen Ship", new[] { "FrozenShip01_DN", "FrozenShip02_DN", "FrozenShip03_DN" }, Minimap.PinType.Icon2),
+            ("StructLumberCamp", "Lumber Camp", new[] { "LumberCamp" }, Minimap.PinType.Icon2),
+            ("StructNorthernHut", "Northern Hut", new[] { "DN_hut01" }, Minimap.PinType.Icon2),
+            ("StructPetrifiedGammeltroll", "Petrified Gammeltroll", new[] { "DN_gammeltrollFrac01", "DN_gammeltrollFrac02" }, Minimap.PinType.Icon3),
+            ("StructIcePond", "Ice Pond", new[] { "IcePond1" }, Minimap.PinType.Icon4),
+            ("StructNorthMemorial", "North Memorial", new[] { "NorthMemorialPlace" }, Minimap.PinType.Icon4),
         };
 
-        // Struktury bez wlasnego renderu - ikona przedmiotu, ktory sie tam zdobywa albo kto tam mieszka.
-        // (Model wejscia do kopalni obejmuje podziemny loch, wiec jego render wychodzi pusty.)
-        private static readonly Dictionary<string, string> StructureItemIcons = new Dictionary<string, string>
+        // Lokacja gry -> kategoria struktury (lokacje sa w swiecie jako LocationProxy z hashem nazwy).
+        private readonly Dictionary<int, ResourceCategory> _structureByLocationHash = new Dictionary<int, ResourceCategory>();
+        private readonly Dictionary<int, string> _locationNameByHash = new Dictionary<int, string>();
+
+        // Ikona struktury: wariantu lokacji, jesli ma wlasna, inaczej ikona kategorii. Wariant z
+        // LocationProxy obiektu albo (np. po wczytaniu swiata) z lokacji gry w miejscu pinu.
+        private Sprite StructureIcon(ResourceCategory category, Vector3 pos, GameObject root = null)
         {
-            { "StructInfestedMine", "TrophySeeker" },
-        };
+            if (category.VariantIcons != null)
+            {
+                string location = null;
+                var zdo = root != null ? root.GetComponent<LocationProxy>()?.GetComponent<ZNetView>()?.GetZDO() : null;
+                if (zdo != null)
+                    _locationNameByHash.TryGetValue(zdo.GetInt(ZDOVars.s_location), out location);
+                location ??= LocationNameAt(pos, category.LocationPrefabs);
+                if (location != null && category.VariantIcons.TryGetValue(location, out var variant))
+                    return variant;
+            }
+            return category.CustomIcon;
+        }
+
+        private const string LegacyFarmVillageKey = "StructFarmVillage";
+        private const string LegacyFarmVillageName = "Farm Village";
 
         private ResourceCategory AddCategory(string key, string displayName, string[] exactNames, string prefix, Minimap.PinType pinType,
             string iconItemNameOverride = null, bool removeOnPicked = true, float? maxVerticalDeltaOverride = null,
@@ -724,7 +869,7 @@ namespace AutoWaypoints
         }
 
         private void AddOreCategory(string key, string displayName, string dropItemName, string nameToken, string worldObjectName = null,
-            string iconWorldPrefab = null)
+            string iconWorldPrefab = null, string[] orePrefabs = null)
         {
             var enabled = Config.Bind("Categories", key, true, $"Auto-pin {displayName}.");
             var category = new ResourceCategory
@@ -740,6 +885,7 @@ namespace AutoWaypoints
                 ExactNames = worldObjectName != null ? new HashSet<string> { worldObjectName } : null,
                 IconItemNameOverride = dropItemName,
                 IconWorldPrefab = iconWorldPrefab,
+                OrePrefabNames = orePrefabs != null ? new HashSet<string>(orePrefabs) : null,
                 PinType = Minimap.PinType.Icon3,
                 Enabled = enabled,
                 ShowName = BindLabel(key, displayName)
@@ -859,6 +1005,23 @@ namespace AutoWaypoints
             if (MapHasGeneratedField.GetValue(Minimap.instance) is bool hasGenerated && !hasGenerated)
                 return;
 
+            // Inny swiat albo inna postac bez restartu gry (wyjscie do menu) - dane pinow naleza do
+            // postaci w danym swiecie, wiec jednorazowe fazy (ikony, ukryte piny) ida od nowa.
+            string session = ZNet.instance?.GetWorldName() + "\n" + CurrentCharacter();
+            if (session != _session)
+            {
+                // Zmiany poprzedniej sesji do jej wlasnych plikow.
+                SaveHiddenPinsIfDirty();
+                SaveCharacterSettingsIfDirty();
+                string character = CurrentCharacter();
+                if (string.IsNullOrEmpty(character))
+                    return;
+                _session = session;
+                LoadCharacterSettings(character);
+                _hiddenPinsLoaded = false;
+                _globalIconPassDone = false;
+            }
+
             if (!_globalIconPassDone)
             {
                 ReapplyAllKnownPinIcons();
@@ -880,6 +1043,7 @@ namespace AutoWaypoints
 
             SaveDiscoveredIfDirty();
             SaveHiddenPinsIfDirty();
+            SaveCharacterSettingsIfDirty();
             ApplyPendingGroupInheritance();
             ApplyPendingHides();
 
@@ -939,6 +1103,8 @@ namespace AutoWaypoints
         {
             Vector3 playerPos = Player.m_localPlayer.transform.position;
             Vector3 center = playerPos + Vector3.up;
+
+            ScanNearbyLocations(playerPos);
 
             int hitCount = Physics.OverlapSphereNonAlloc(center, _scanRadius.Value, _scanBuffer);
             if (hitCount >= _scanBuffer.Length)
@@ -1050,9 +1216,12 @@ namespace AutoWaypoints
                 // Dopasowanie po m_name (pewny token typu "$piece_deposit_copper") ALBO,
                 // jesli nieznany, po nazwie przedmiotu z drop table (pomijajac "Stone" -
                 // to wspolny "smiec" dla kazdego typu zyly, nie sam wlasciwy surowiec).
-                var oreCategory = _categories.FirstOrDefault(c =>
-                    ((c.OreNameTokens != null && nameToken != null && c.OreNameTokens.Contains(nameToken)) ||
-                     (c.OreDropItemNames != null && dropItemName != null && dropItemName != "Stone" && c.OreDropItemNames.Contains(dropItemName))));
+                // Zloza rozrozniane po prefabie maja pierwszenstwo i pasuja TYLKO po prefabie.
+                string orePrefab = oreObj.name.Replace("(Clone)", string.Empty).Trim();
+                var oreCategory = _categories.FirstOrDefault(c => c.OrePrefabNames != null && c.OrePrefabNames.Contains(orePrefab))
+                    ?? _categories.FirstOrDefault(c => c.OrePrefabNames == null &&
+                        ((c.OreNameTokens != null && nameToken != null && c.OreNameTokens.Contains(nameToken)) ||
+                         (c.OreDropItemNames != null && dropItemName != null && dropItemName != "Stone" && c.OreDropItemNames.Contains(dropItemName))));
                 if (oreCategory == null)
                 {
                     if (_debugLogNearby.Value)
@@ -1135,8 +1304,6 @@ namespace AutoWaypoints
                 var zdo = znetView != null ? znetView.GetZDO() : null;
                 int locationHash = zdo != null ? zdo.GetInt(ZDOVars.s_location) : 0;
 
-                bool isDungeon = DungeonLocationByHash.TryGetValue(locationHash, out var dungeonInfo);
-
                 if (_debugLogNearby.Value)
                 {
                     string resolvedName = "?";
@@ -1145,39 +1312,23 @@ namespace AutoWaypoints
                         : null;
                     if (locationsByHash != null && locationsByHash.TryGetValue(locationHash, out var zoneLoc))
                         resolvedName = $"m_name='{zoneLoc.m_name}' m_prefabName='{zoneLoc.m_prefabName}'";
-                    Log.LogInfo($"[DIAG-DUNGEON] LocationProxy locationHash={locationHash} resolved=[{resolvedName}] isDungeon={isDungeon} pos={locObj.transform.position}");
+                    Log.LogInfo($"[DIAG-DUNGEON] LocationProxy locationHash={locationHash} resolved=[{resolvedName}] pos={locObj.transform.position}");
                 }
 
-                if (!isDungeon)
-                    return;
-                var dungeonCategory = _dungeonCategoriesByName[dungeonInfo.DisplayName];
-                if (Mathf.Abs(locObj.transform.position.y - playerPos.y) > (dungeonCategory.MaxVerticalDeltaOverride ?? MaxVerticalDelta))
-                    return;
+                TrackLocation(locObj, locationHash, playerPos, MinPinSpacing);
+                return;
+            }
 
-                // Adopcja po pozycji (nie po nazwie - kazdy typ dungeonu ma inna nazwe pinu).
-                Sprite dungeonIcon = ResolveDungeonPinIcon(dungeonInfo.PinType, dungeonInfo.IconKey, dungeonInfo.TrophyItemName);
-
-                var existingDungeonPin = FindNearbyDungeonPin(locObj.transform.position);
-                if (existingDungeonPin != null)
-                {
-                    existingDungeonPin.m_name = dungeonInfo.DisplayName;
-                    // Gra nie zapisuje niestandardowej ikony pinu (tak samo jak dla struktur) -
-                    // bez tego istniejacy pin nigdy by nie dostal wlasnej ikony, tylko sama
-                    // nazwa by sie odswiezala (to byl dokladnie zgloszony problem z Bear Cave).
-                    if (dungeonIcon != null)
-                    {
-                        existingDungeonPin.m_icon = dungeonIcon;
-                        if (existingDungeonPin.m_iconElement != null)
-                            existingDungeonPin.m_iconElement.sprite = dungeonIcon;
-                    }
-                    if (!_tracked.Values.Any(t => t.Pin == existingDungeonPin))
-                        _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = existingDungeonPin, Category = dungeonCategory };
+            // Lokacje skladane z pomieszczen (obozy Fulingow, wioski, twierdze...): LocationProxy ma
+            // pusty model, a budynki stawia generator (DungeonGenerator) jako osobny obiekt swiata -
+            // rozpoznajemy go po motywie pomieszczen.
+            var generator = hit.GetComponentInParent<DungeonGenerator>();
+            if (generator != null && LocationForTheme(generator.m_themes) is string themedLocation)
+            {
+                GameObject genObj = generator.gameObject;
+                if (!seenRoots.Add(genObj) || _tracked.ContainsKey(genObj))
                     return;
-                }
-
-                var dungeonPin = CreatePinForFind(dungeonCategory, locObj.transform.position, dungeonInfo.PinType, dungeonInfo.DisplayName, dungeonIcon);
-                _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = dungeonPin, Category = dungeonCategory };
-                Log.LogInfo($"Auto-pin dodany: {dungeonInfo.DisplayName} @ {locObj.transform.position}");
+                TrackLocation(genObj, themedLocation.GetStableHashCode(), playerPos, LocationPinAdoptRadius);
                 return;
             }
 
@@ -1356,6 +1507,18 @@ namespace AutoWaypoints
                 return;
             ResolvePieceIcons();
 
+            // Dawne piny kategorii rozbitych na kilka - przed ikonami, zeby od razu dostaly ikone
+            // nowej kategorii. Reszta (odkrycie, ukrycie) po petli, bo ukrycie zdejmuje pin z listy.
+            var renamed = new List<Minimap.PinData>();
+            foreach (var pin in pins)
+            {
+                var split = ResolveSplitLegacy(pin.m_name, pin.m_pos);
+                if (split == null)
+                    continue;
+                RenamePin(pin, split.DisplayName);
+                renamed.Add(pin);
+            }
+
             int fixedCount = 0;
             var failuresByCategory = new Dictionary<string, int>();
             foreach (var pin in pins)
@@ -1425,9 +1588,10 @@ namespace AutoWaypoints
                 // w ObjectDB jak dla przedmiotow, wiec nie moze sie tu "nie udac".
                 if (category.CustomIcon != null)
                 {
-                    pin.m_icon = category.CustomIcon;
+                    var structureIcon = StructureIcon(category, pin.m_pos);
+                    pin.m_icon = structureIcon;
                     if (pin.m_iconElement != null)
-                        pin.m_iconElement.sprite = category.CustomIcon;
+                        pin.m_iconElement.sprite = structureIcon;
                     fixedCount++;
                     continue;
                 }
@@ -1458,6 +1622,11 @@ namespace AutoWaypoints
                 fixedCount++;
             }
 
+            foreach (var pin in renamed)
+                OnPinRenamed(pin);
+            if (renamed.Count > 0)
+                Log.LogInfo($"Przypisano {renamed.Count} dawnych pinow do nowych kategorii (po lokacji gry).");
+
             Log.LogInfo($"Globalny przebieg ikonek pinow: naprawiono {fixedCount} z {pins.Count}.");
             foreach (var kv in failuresByCategory)
                 Log.LogWarning($"Globalny przebieg ikonek: '{kv.Key}' nie naprawiono ({kv.Value}x) - brak ikony przedmiotu w ObjectDB i w lupach obiektu.");
@@ -1473,10 +1642,10 @@ namespace AutoWaypoints
             return builtByPlayer == category.PlayerBuilt.Value;
         }
 
-        private static Minimap.PinData FindNearbyPinNamed(string[] names, Vector3 pos)
+        private static Minimap.PinData FindNearbyPinNamed(string[] names, Vector3 pos, float radius = MinPinSpacing)
         {
             var pins = PinsField.GetValue(Minimap.instance) as List<Minimap.PinData>;
-            return pins?.FirstOrDefault(p => names.Contains(p.m_name) && Vector3.Distance(p.m_pos, pos) < MinPinSpacing);
+            return pins?.FirstOrDefault(p => names.Contains(p.m_name) && Vector3.Distance(p.m_pos, pos) < radius);
         }
 
         // Prefaby budowli sa dostepne dopiero w swiecie (ZNetScene), nie w Awake - stad ikona
@@ -1489,10 +1658,103 @@ namespace AutoWaypoints
                 category.CustomIcon = ZNetScene.instance.GetPrefab(category.IconPiecePrefab)?.GetComponent<Piece>()?.m_icon;
         }
 
-        private static Minimap.PinData FindNearbyPin(ResourceCategory category, Vector3 pos)
+        private static Minimap.PinData FindNearbyPin(ResourceCategory category, Vector3 pos, float radius = MinPinSpacing)
         {
             var pins = PinsField.GetValue(Minimap.instance) as List<Minimap.PinData>;
-            return pins?.FirstOrDefault(p => p.m_name == category.DisplayName && Vector3.Distance(p.m_pos, pos) < MinPinSpacing);
+            return pins?.FirstOrDefault(p => p.m_name == category.DisplayName && Vector3.Distance(p.m_pos, pos) < radius);
+        }
+
+        // Struktura rozpoznana po LocationProxy (hash lokacji): pin w srodku lokacji. Istniejacy pin
+        // tej kategorii (albo pod dawna nazwa) przejmujemy w promieniu calej lokacji - piny dodane
+        // wczesniej po nazwie obiektu stoja przy jej fragmencie, nie w srodku.
+        private const float LocationPinAdoptRadius = 50f;
+
+        // Motyw pomieszczen generatora -> lokacja gry (lokacje skladane z pomieszczen, stojace na
+        // powierzchni; lochy z wnetrzem rozpoznaje LocationProxy przy wejsciu).
+        private static readonly Dictionary<Room.Theme, string> LocationByTheme = new Dictionary<Room.Theme, string>
+        {
+            { Room.Theme.GoblinCamp, "GoblinCamp2" },
+            { Room.Theme.MeadowsVillage, "WoodVillage1" },
+            { Room.Theme.MeadowsFarm, "WoodFarm1" },
+            { Room.Theme.NorthVillage, "NorthVillage" },
+            { Room.Theme.FortressRuins, "FortressRuins" },
+            { Room.Theme.AshlandRuins, "AshlandRuins" },
+            { Room.Theme.PlainsFortHildir, "Hildir_plainsfortress" },
+        };
+
+        private static string LocationForTheme(Room.Theme themes) =>
+            LocationByTheme.Where(kv => (themes & kv.Key) != 0).Select(kv => kv.Value).FirstOrDefault();
+
+        // Lokacja rozpoznana po hashu nazwy (LocationProxy albo motyw generatora) - loch albo struktura.
+        private void TrackLocation(GameObject obj, int locationHash, Vector3 playerPos, float adoptRadius)
+        {
+            if (DungeonLocationByHash.TryGetValue(locationHash, out var dungeonInfo))
+                TrackDungeonLocation(obj, dungeonInfo, playerPos, adoptRadius);
+            else if (_structureByLocationHash.TryGetValue(locationHash, out var structure))
+                TrackStructureLocation(obj, structure, playerPos);
+        }
+
+        private void TrackDungeonLocation(GameObject locObj, (string DisplayName, Minimap.PinType PinType, string IconKey, string TrophyItemName) dungeonInfo,
+            Vector3 playerPos, float adoptRadius)
+        {
+            var dungeonCategory = _dungeonCategoriesByName[dungeonInfo.DisplayName];
+            if (Mathf.Abs(locObj.transform.position.y - playerPos.y) > (dungeonCategory.MaxVerticalDeltaOverride ?? MaxVerticalDelta))
+                return;
+
+            // Adopcja po pozycji (nie po nazwie - kazdy typ dungeonu ma inna nazwe pinu).
+            Sprite dungeonIcon = ResolveDungeonPinIcon(dungeonInfo.PinType, dungeonInfo.IconKey, dungeonInfo.TrophyItemName);
+
+            var existingDungeonPin = FindNearbyDungeonPin(locObj.transform.position, adoptRadius, dungeonInfo.DisplayName);
+            if (existingDungeonPin != null)
+            {
+                // Pin pod dawna nazwa (np. "Crypt" sprzed zmiany na "Burial Chambers").
+                if (existingDungeonPin.m_name != dungeonInfo.DisplayName)
+                {
+                    existingDungeonPin.m_name = dungeonInfo.DisplayName;
+                    OnPinRenamed(existingDungeonPin);
+                }
+                // Gra nie zapisuje niestandardowej ikony pinu (tak samo jak dla struktur) -
+                // bez tego istniejacy pin nigdy by nie dostal wlasnej ikony, tylko sama
+                // nazwa by sie odswiezala (to byl dokladnie zgloszony problem z Bear Cave).
+                if (dungeonIcon != null)
+                {
+                    existingDungeonPin.m_icon = dungeonIcon;
+                    if (existingDungeonPin.m_iconElement != null)
+                        existingDungeonPin.m_iconElement.sprite = dungeonIcon;
+                }
+                if (!_tracked.Values.Any(t => t.Pin == existingDungeonPin))
+                    _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = existingDungeonPin, Category = dungeonCategory };
+                return;
+            }
+
+            var dungeonPin = CreatePinForFind(dungeonCategory, locObj.transform.position, dungeonInfo.PinType, dungeonInfo.DisplayName, dungeonIcon);
+            _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = dungeonPin, Category = dungeonCategory };
+            Log.LogInfo($"Auto-pin dodany: {dungeonInfo.DisplayName} @ {locObj.transform.position}");
+        }
+
+        private void TrackStructureLocation(GameObject locObj, ResourceCategory category, Vector3 playerPos)
+        {
+            Vector3 pos = locObj.transform.position;
+            if (Mathf.Abs(pos.y - playerPos.y) > (category.MaxVerticalDeltaOverride ?? MaxVerticalDelta))
+                return;
+            var existingPin = FindNearbyPin(category, pos, LocationPinAdoptRadius);
+            if (existingPin == null && category.LegacyPinNames != null)
+            {
+                existingPin = FindNearbyPinNamed(category.LegacyPinNames, pos, LocationPinAdoptRadius);
+                if (existingPin != null)
+                {
+                    existingPin.m_name = category.DisplayName;
+                    OnPinRenamed(existingPin);
+                }
+            }
+            if (existingPin != null)
+            {
+                if (!_tracked.Values.Any(t => t.Pin == existingPin))
+                    _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = existingPin, Category = category };
+                ReapplyIcon(existingPin, category, locObj, null, category.DisplayName);
+                return;
+            }
+            AddResourcePin(locObj, category, category.DisplayName, null);
         }
 
         // Pin portalu w poblizu - z rejestru pozycji albo (dawne piny) po nazwie "Portal: ...",
@@ -1507,14 +1769,21 @@ namespace AutoWaypoints
         // (nie po prefiksie, bo kazdy typ ma inna nazwe) - chroni przed przejeciem przypadkowego,
         // niepowiazanego pinu stojacego obok wejscia do lochu.
         private static readonly HashSet<string> DungeonDisplayNames =
-            new HashSet<string>(DungeonLocationDefs.Select(d => d.DisplayName));
+            new HashSet<string>(DungeonLocationDefs.Select(d => d.DisplayName).Concat(DungeonLegacyPinNames.Values.SelectMany(n => n)));
 
-        private static Minimap.PinData FindNearbyDungeonPin(Vector3 pos)
+        // W zwyklym promieniu przejmuje pin dowolnego lochu (np. po zmianie rodzaju); w wiekszym
+        // (cala lokacja z pomieszczeniami) tylko pin tej samej kategorii, zeby nie zabrac pinu
+        // sasiedniego lochu.
+        private Minimap.PinData FindNearbyDungeonPin(Vector3 pos, float radius, string displayName)
         {
             var pins = PinsField.GetValue(Minimap.instance) as List<Minimap.PinData>;
+            var own = new HashSet<string> { displayName };
+            if (DungeonLegacyPinNames.TryGetValue(displayName, out var legacy))
+                own.UnionWith(legacy);
+            var allowed = radius <= MinPinSpacing ? DungeonDisplayNames : own;
             return pins?.FirstOrDefault(p =>
-                p.m_name != null && DungeonDisplayNames.Contains(p.m_name) &&
-                Vector3.Distance(p.m_pos, pos) < MinPinSpacing);
+                p.m_name != null && allowed.Contains(p.m_name) &&
+                Vector3.Distance(p.m_pos, pos) < radius);
         }
 
         private static string ResolveDropItemName(DropTable table)
@@ -1529,9 +1798,10 @@ namespace AutoWaypoints
         {
             if (category.CustomIcon != null)
             {
-                pin.m_icon = category.CustomIcon;
+                var structureIcon = StructureIcon(category, pin.m_pos, root);
+                pin.m_icon = structureIcon;
                 if (pin.m_iconElement != null)
-                    pin.m_iconElement.sprite = category.CustomIcon;
+                    pin.m_iconElement.sprite = structureIcon;
                 return;
             }
 
@@ -1582,7 +1852,7 @@ namespace AutoWaypoints
 
         private void AddResourcePin(GameObject root, ResourceCategory category, string matchedName, Pickable pickable)
         {
-            Sprite icon = category.CustomIcon;
+            Sprite icon = category.CustomIcon != null ? StructureIcon(category, root.transform.position, root) : null;
             string diag = "wlasna ikona (renderowana z pliku gry)";
             if (icon == null)
                 icon = ResolveIcon(root, pickable, category.IconItemNameOverride ?? matchedName, out diag);
@@ -1972,13 +2242,62 @@ namespace AutoWaypoints
         // Do wersji 1.0.0 dane byly zapisywane obok DLL.
         private static string LegacySaveDir => System.IO.Path.GetDirectoryName(typeof(AutoWaypointsPlugin).Assembly.Location);
 
+        private static string SafeFileName(string name) => string.Join("_", name.Split(System.IO.Path.GetInvalidFileNameChars()));
+
+        // Dane o samym swiecie (rejestr portali).
         private static string WorldFilePath(string prefix, string worldName)
         {
-            string safe = string.Join("_", worldName.Split(System.IO.Path.GetInvalidFileNameChars()));
-            string fileName = $"{prefix}_{safe}.json";
+            string fileName = $"{prefix}_{SafeFileName(worldName)}.json";
             string path = System.IO.Path.Combine(SaveDir, fileName);
             MigrateLegacyFile(System.IO.Path.Combine(LegacySaveDir, fileName), path);
             return path;
+        }
+
+        // Postac w grze = jej plik zapisu (.fch); nazwa wyswietlana moze sie powtarzac.
+        private static string CurrentCharacter()
+        {
+            var profile = Game.instance != null ? Game.instance.GetPlayerProfile() : null;
+            if (profile == null)
+                return null;
+            return !string.IsNullOrEmpty(profile.m_filename) ? profile.m_filename : profile.GetName();
+        }
+
+        // Dane zwiazane z pinami mapy (ukryte piny, odkryte kategorie) - piny mapy naleza do postaci,
+        // wiec plik jest na swiat I postac.
+        private static string CharacterFilePath(string prefix, string worldName, string character)
+        {
+            string path = System.IO.Path.Combine(SaveDir, $"{prefix}_{SafeFileName(worldName)}_{SafeFileName(character)}.json");
+            if (!System.IO.File.Exists(path))
+                TakeOverWorldFile(prefix, worldName, path);
+            return path;
+        }
+
+        // Do 1.0.3 te dane byly wspolne dla wszystkich postaci w swiecie. Przejmuje je pierwsza
+        // postac, ktora wejdzie do swiata po aktualizacji; stare pliki zostaja jako *.migrated
+        // (kopia zapasowa), zeby nie trafily tez do kolejnych postaci.
+        private static void TakeOverWorldFile(string prefix, string worldName, string path)
+        {
+            string fileName = $"{prefix}_{SafeFileName(worldName)}.json";
+            var sources = new[] { System.IO.Path.Combine(SaveDir, fileName), System.IO.Path.Combine(LegacySaveDir, fileName) }
+                .Where(System.IO.File.Exists).ToList();
+            if (sources.Count == 0)
+                return;
+            try
+            {
+                System.IO.File.Copy(sources[0], path);
+                foreach (var source in sources)
+                {
+                    string backup = source + ".migrated";
+                    if (System.IO.File.Exists(backup))
+                        System.IO.File.Delete(backup);
+                    System.IO.File.Move(source, backup);
+                }
+                Log.LogInfo($"Zapis wspolny dla swiata przejety przez postac: {sources[0]} -> {path}");
+            }
+            catch (Exception e)
+            {
+                Log.LogWarning($"Nie udalo sie przejac wspolnego zapisu swiata ({sources[0]}): {e}");
+            }
         }
 
         // Jednorazowo kopiuje plik ze starego miejsca, dopoki w nowym go nie ma.
@@ -1997,7 +2316,8 @@ namespace AutoWaypoints
             }
         }
 
-        private static string HiddenPinsFilePath(string worldName) => WorldFilePath("hidden_pins", worldName);
+        // Plik ukrytych pinow wczytanej sesji (swiat + postac) - zapis idzie zawsze tam, skad wczytano.
+        private string _hiddenPinsPath;
 
         // Zapis przez plik tymczasowy - przerwany zapis (crash, zamkniecie gry) nie zostawi
         // polowicznego JSON-a w miejscu dobrego.
@@ -2014,12 +2334,14 @@ namespace AutoWaypoints
         private void TryLoadHiddenPins()
         {
             string worldName = ZNet.instance?.GetWorldName();
-            if (string.IsNullOrEmpty(worldName))
+            string character = CurrentCharacter();
+            if (string.IsNullOrEmpty(worldName) || string.IsNullOrEmpty(character))
                 return;
             _hiddenPinsLoaded = true;
             _hiddenPins.Clear();
 
-            string path = HiddenPinsFilePath(worldName);
+            string path = CharacterFilePath("hidden_pins", worldName, character);
+            _hiddenPinsPath = path;
             if (!System.IO.File.Exists(path))
                 return;
             try
@@ -2049,6 +2371,14 @@ namespace AutoWaypoints
                         PinType = data.PinTypes[i],
                         Save = data.Saves[i]
                     };
+                    // Dawna nazwa kategorii rozbitej na kilka - nowa kategoria z lokacji w miejscu pinu.
+                    var split = r.CategoryKey == _portalCategory.Key ? null : ResolveSplitLegacy(r.DisplayName, data.Positions[i]);
+                    if (split != null)
+                    {
+                        r.CategoryKey = split.Key;
+                        r.DisplayName = split.DisplayName;
+                        _hiddenPinsSaveDirty = true;
+                    }
                     if (!_hiddenPins.TryGetValue(r.CategoryKey, out var list))
                         _hiddenPins[r.CategoryKey] = list = new List<HiddenPinRecord>();
                     list.Add(r);
@@ -2069,10 +2399,9 @@ namespace AutoWaypoints
         {
             try
             {
-                string worldName = ZNet.instance?.GetWorldName();
-                if (string.IsNullOrEmpty(worldName))
+                if (_hiddenPinsPath == null)
                 {
-                    Log.LogWarning("Zapis schowanych pinow: brak nazwy swiata (ZNet.instance.GetWorldName()) - NIE zapisano.");
+                    Log.LogWarning("Zapis schowanych pinow: plik sesji (swiat + postac) jeszcze nie ustalony - NIE zapisano.");
                     return;
                 }
                 var data = new HiddenPinsFile();
@@ -2094,8 +2423,7 @@ namespace AutoWaypoints
                     return;
                 }
 
-                string path = HiddenPinsFilePath(worldName);
-                WriteFileAtomically(path, json);
+                WriteFileAtomically(_hiddenPinsPath, json);
             }
             catch (Exception e)
             {
@@ -2113,7 +2441,7 @@ namespace AutoWaypoints
                 var pos = new Vector3(r.X, r.Y, r.Z);
                 var fresh = Minimap.instance.AddPin(pos, (Minimap.PinType)r.PinType, r.DisplayName, r.Save, false);
                 if (category.CustomIcon != null)
-                    fresh.m_icon = category.CustomIcon;
+                    fresh.m_icon = StructureIcon(category, pos);
             }
             _hiddenPins.Remove(category.Key);
             SaveHiddenPins();
@@ -2181,6 +2509,61 @@ namespace AutoWaypoints
                 if (prefabName != null && bossNames.Contains(prefabName))
                     _bossLocations.Add((instance.m_position, prefabName));
             }
+        }
+
+        // Dawna nazwa pinu, ktora teraz przejmuje kilka kategorii (np. "Farm Village" -> wioska
+        // draugrow albo opuszczona farma): wlasciwa wynika z lokacji gry w miejscu pinu. Null, gdy
+        // nazwa nadal jest aktualna albo lokacji nie da sie ustalic (np. klient serwera - wtedy pin
+        // przejmie kategoria, gdy gracz przejdzie obok).
+        private const float LegacySplitRadius = 50f;
+        private List<(Vector3 Pos, string PrefabName)> _allLocations;
+        private ZoneSystem _allLocationsSource;
+
+        private ResourceCategory ResolveSplitLegacy(string pinName, Vector3 pos)
+        {
+            if (pinName == null || CategoryForName(pinName) != null)
+                return null;
+            // Tylko z potwierdzeniem lokacji gry w miejscu pinu - wlasny pin gracza o takiej samej
+            // nazwie (np. "Crypt") w innym miejscu zostaje nietkniety.
+            var candidates = _categories.Where(c => c.LegacyPinNames != null && c.LocationPrefabs != null &&
+                                                    c.LegacyPinNames.Contains(pinName)).ToList();
+            if (candidates.Count == 0)
+                return null;
+
+            string location = LocationNameAt(pos, new HashSet<string>(candidates.SelectMany(c => c.LocationPrefabs)));
+            return location != null ? candidates.First(c => c.LocationPrefabs.Contains(location)) : null;
+        }
+
+        // Najblizsza lokacja gry z podanego zbioru nazw w miejscu pozycji (lista lokacji swiata jest
+        // tylko u hosta - u klienta serwera null).
+        private string LocationNameAt(Vector3 pos, HashSet<string> names)
+        {
+            if (names == null)
+                return null;
+            return AllLocations()
+                .Where(l => names.Contains(l.PrefabName) && Utils.DistanceXZ(l.Pos, pos) < LegacySplitRadius)
+                .OrderBy(l => Utils.DistanceXZ(l.Pos, pos))
+                .Select(l => l.PrefabName)
+                .FirstOrDefault();
+        }
+
+        private List<(Vector3 Pos, string PrefabName)> AllLocations()
+        {
+            if (_allLocationsSource == ZoneSystem.instance && _allLocations != null && _allLocations.Count > 0)
+                return _allLocations;
+            _allLocationsSource = ZoneSystem.instance;
+            _allLocations = new List<(Vector3, string)>();
+            if (ZoneSystem.instance != null &&
+                LocationInstancesField?.GetValue(ZoneSystem.instance) is System.Collections.IDictionary instances)
+            {
+                foreach (var value in instances.Values)
+                {
+                    var instance = (ZoneSystem.LocationInstance)value;
+                    if (instance.m_location?.m_prefabName != null)
+                        _allLocations.Add((instance.m_position, instance.m_location.m_prefabName));
+                }
+            }
+            return _allLocations;
         }
 
         private string ResolveNativeBossLocation(Minimap.PinData pin)
@@ -2376,6 +2759,10 @@ namespace AutoWaypoints
 
         private void SetCategoryVisibility(ResourceCategory category, bool visible)
         {
+            // Wczytywanie ustawien innej postaci - mape wyrowna RefreshAllVisibility po wczytaniu
+            // jej ukrytych pinow (teraz plik ukrytych pinow nalezy jeszcze do poprzedniej sesji).
+            if (_applyingCharacterSettings)
+                return;
             // Widocznosc ikon bossow z gry zalezy od tego, czy stoi przy nich pin oltarza z moda.
             if (category.MenuGroup == BossAltarsGroup)
                 RequestPinUpdate();
@@ -2443,7 +2830,9 @@ namespace AutoWaypoints
         }
 
         private readonly HashSet<string> _discoveredKeys = new HashSet<string>();
+        // Sesja odkryc (swiat + postac) i jej plik.
         private string _discoveryWorld;
+        private string _discoveryPath;
         private bool _discoverySaveDirty;
         private bool _categoryListDirty = true;
 
@@ -2475,17 +2864,22 @@ namespace AutoWaypoints
         private bool EnsureDiscoveryLoaded()
         {
             string worldName = ZNet.instance?.GetWorldName();
-            if (string.IsNullOrEmpty(worldName))
+            string character = CurrentCharacter();
+            if (string.IsNullOrEmpty(worldName) || string.IsNullOrEmpty(character))
                 return false;
-            if (worldName == _discoveryWorld)
+            string session = worldName + "\n" + character;
+            if (session == _discoveryWorld)
                 return true;
 
-            _discoveryWorld = worldName;
+            // Niezapisane odkrycia poprzedniej sesji trafiaja do jej wlasnego pliku.
+            SaveDiscoveredIfDirty();
+            _discoveryWorld = session;
             _discoveredKeys.Clear();
             _discoverySaveDirty = false;
             _categoryListDirty = true;
 
-            string path = WorldFilePath("discovered", worldName);
+            string path = CharacterFilePath("discovered", worldName, character);
+            _discoveryPath = path;
             if (!System.IO.File.Exists(path))
                 return true;
             try
@@ -2519,7 +2913,7 @@ namespace AutoWaypoints
         // swiata odkrywa sie naraz kilkadziesiat kategorii.
         private void SaveDiscoveredIfDirty()
         {
-            if (!_discoverySaveDirty || _discoveryWorld == null)
+            if (!_discoverySaveDirty || _discoveryPath == null)
                 return;
             _discoverySaveDirty = false;
             try
@@ -2532,7 +2926,7 @@ namespace AutoWaypoints
                     Log.LogError($"Zapis odkrytych kategorii: serializacja zgubila dane ('{json}') - NIE nadpisuje pliku.");
                     return;
                 }
-                WriteFileAtomically(WorldFilePath("discovered", _discoveryWorld), json);
+                WriteFileAtomically(_discoveryPath, json);
             }
             catch (Exception e)
             {
@@ -2629,7 +3023,7 @@ namespace AutoWaypoints
         // =====================================================================================
 
         private const float MenuPanelWidth = 460f;
-        private const float MenuPanelHeight = 560f;
+        private const float MenuPanelHeight = 590f;
         private const float MenuRowHeight = 26f;
 
         private void ToggleSettingsMenu()
@@ -2653,6 +3047,7 @@ namespace AutoWaypoints
             }
 
             var gui = GUIManager.Instance;
+            _menuToggles.Clear();
             _settingsPanel = gui.CreateWoodpanel(
                 GUIManager.CustomGUIFront.transform,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero,
@@ -2677,6 +3072,8 @@ namespace AutoWaypoints
             y = BuildToggleRow(_settingsPanel.transform, y, "Show pin labels", _showPinLabels);
             y -= 4f;
             y = BuildToggleRow(_settingsPanel.transform, y, "Replace boss icons", _replaceBossAltars);
+            y -= 4f;
+            y = BuildToggleRow(_settingsPanel.transform, y, "Replace location icons", _replaceLocationIcons);
 
             y -= 10f;
             y = BuildScanRadiusRow(_settingsPanel.transform, y);
@@ -2792,9 +3189,9 @@ namespace AutoWaypoints
         // Grupowanie tylko dla wygody wyswietlania w menu (nie zmienia zadnej logiki skanowania)
         // - rudy i jagody nie maja wspolnego przedrostka klucza wiec sa wymienione wprost,
         // reszta po przedrostku klucza (Mushroom*/Crop*/Seed*/Struct*).
-        private static readonly HashSet<string> OreKeys = new HashSet<string> { "Copper", "Silver", "Tin", "Iron", "Obsidian", "Meteorite" };
-        private static readonly HashSet<string> BerryKeys = new HashSet<string> { "Blueberry", "Cloudberry", "Raspberry", "Lingonberry" };
-        private static readonly HashSet<string> HerbKeys = new HashSet<string> { "Thistle", "Dandelion" };
+        private static readonly HashSet<string> OreKeys = new HashSet<string> { "Copper", "Silver", "Tin", "Iron", "Obsidian", "Meteorite", "FlametalDeposit" };
+        private static readonly HashSet<string> BerryKeys = new HashSet<string> { "Blueberry", "Cloudberry", "Raspberry", "Lingonberry", "Vineberry" };
+        private static readonly HashSet<string> HerbKeys = new HashSet<string> { "Thistle", "Dandelion", "Fiddlehead" };
 
         private static string GetGroupName(ResourceCategory c)
         {
@@ -2964,6 +3361,7 @@ namespace AutoWaypoints
             var toggle = toggleGO.GetComponent<Toggle>();
             toggle.isOn = config.Value;
             toggle.onValueChanged.AddListener(v => config.Value = v);
+            _menuToggles.Add((toggle, config));
 
             var textGO = gui.CreateText(label, parent, new Vector2(0f, 1f), new Vector2(0f, 1f),
                 new Vector2(36f, y), gui.AveriaSerifBold, 15, Color.white, false, Color.black,
