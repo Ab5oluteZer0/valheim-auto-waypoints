@@ -146,6 +146,12 @@ The build automatically copies the built DLL into
 Structure and dungeon icons are renders of Valheim's own 3D models.
 Valheim and its assets are the property of Iron Gate AB.
 
+## Support
+
+All my mods are free and will stay free. If you enjoy them and want to say
+thanks, you can leave a voluntary tip via [PayPal](https://www.paypal.com/ncp/payment/4JQUSHTJGBAG6) - it doesn't
+unlock anything, it just helps me keep making mods.
+
 ## License
 
 MIT - see [LICENSE](LICENSE). Applies to this mod's code, not to Valheim's
