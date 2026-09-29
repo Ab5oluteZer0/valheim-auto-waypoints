@@ -25,7 +25,7 @@ namespace AutoWaypoints
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.0.1";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -1936,12 +1936,38 @@ namespace AutoWaypoints
         private readonly Dictionary<string, List<HiddenPinRecord>> _hiddenPins = new Dictionary<string, List<HiddenPinRecord>>();
         private bool _hiddenPinsLoaded;
 
-        private static string HiddenPinsSaveDir => System.IO.Path.GetDirectoryName(typeof(AutoWaypointsPlugin).Assembly.Location);
+        // Dane modu (ukryte piny, portale, odkryte kategorie) leza w BepInEx/config/AutoWaypoints, a nie
+        // obok DLL: menedzery modow (r2modman) przy kazdej aktualizacji kasuja caly folder pluginu.
+        private static string _saveDir;
+        private static string SaveDir => _saveDir ??= System.IO.Directory.CreateDirectory(
+            System.IO.Path.Combine(Paths.ConfigPath, "AutoWaypoints")).FullName;
+
+        // Do wersji 1.0.0 dane byly zapisywane obok DLL.
+        private static string LegacySaveDir => System.IO.Path.GetDirectoryName(typeof(AutoWaypointsPlugin).Assembly.Location);
 
         private static string WorldFilePath(string prefix, string worldName)
         {
             string safe = string.Join("_", worldName.Split(System.IO.Path.GetInvalidFileNameChars()));
-            return System.IO.Path.Combine(HiddenPinsSaveDir, $"{prefix}_{safe}.json");
+            string fileName = $"{prefix}_{safe}.json";
+            string path = System.IO.Path.Combine(SaveDir, fileName);
+            MigrateLegacyFile(System.IO.Path.Combine(LegacySaveDir, fileName), path);
+            return path;
+        }
+
+        // Jednorazowo kopiuje plik ze starego miejsca, dopoki w nowym go nie ma.
+        private static void MigrateLegacyFile(string legacyPath, string path)
+        {
+            if (System.IO.File.Exists(path) || !System.IO.File.Exists(legacyPath))
+                return;
+            try
+            {
+                System.IO.File.Copy(legacyPath, path);
+                Log.LogInfo($"Przeniesiono zapis ze starego miejsca: {legacyPath} -> {path}");
+            }
+            catch (Exception e)
+            {
+                Log.LogWarning($"Nie udalo sie przeniesc zapisu ze starego miejsca ({legacyPath}): {e}");
+            }
         }
 
         private static string HiddenPinsFilePath(string worldName) => WorldFilePath("hidden_pins", worldName);
