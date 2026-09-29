@@ -69,6 +69,11 @@ hidden, newly discovered kinds of that group start hidden too.
 
 Your own pins are never touched.
 
+Works together with
+[Nav Compass](https://github.com/Ab5oluteZer0/valheim-nav-compass): a tracked
+pin's name on the compass follows the label settings here. Other mods can ask
+the same thing through the public `AutoWaypointsPlugin.IsPinLabelVisible(pin)`.
+
 **Upgrading from 0.1.0:** the single "Dungeon" switch is replaced by one per
 dungeon kind (its old setting carries over), and portal pins named
 "Portal: name" are renamed to just "name" the first time you load a world.

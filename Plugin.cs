@@ -25,7 +25,7 @@ namespace AutoWaypoints
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "0.2.0";
+        public const string PluginVersion = "0.2.1";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -574,16 +574,26 @@ namespace AutoWaypoints
             var label = pin.m_NamePinData?.PinNameGameObject;
             if (label == null)
                 return;
+            SetHiddenByAlpha(label, ShouldHideLabel(pin));
+        }
+
+        private bool ShouldHideLabel(Minimap.PinData pin)
+        {
             var category = CategoryForPin(pin);
             // Pin bossa dodany przez gre (Vegvisir) slucha przelacznika podpisu swojego oltarza.
             if (category == null && pin.m_type == Minimap.PinType.Boss)
                 category = NativeBossCategory(pin);
-            bool hide = category != null && (!_showPinLabels.Value || !category.ShowName.Value);
-            if (!hide && pin.m_type == Minimap.PinType.Boss && Minimap.instance != null &&
-                PinsField.GetValue(Minimap.instance) is List<Minimap.PinData> pins)
-                hide = IsBossPinYielding(pin, pins) || IsNativeBossPinHiddenByCategory(pin);
-            SetHiddenByAlpha(label, hide);
+            if (category != null && (!_showPinLabels.Value || !category.ShowName.Value))
+                return true;
+            return pin.m_type == Minimap.PinType.Boss && Minimap.instance != null &&
+                   PinsField.GetValue(Minimap.instance) is List<Minimap.PinData> pins &&
+                   (IsBossPinYielding(pin, pins) || IsNativeBossPinHiddenByCategory(pin));
         }
+
+        // Publiczne API dla innych modow (np. Nav Compass, szukany przez BepInEx Chainloader
+        // i refleksje - bez twardej zaleznosci): czy podpis tego pinu jest widoczny wedlug
+        // ustawien tego moda. Dla pinow spoza jego kategorii zawsze true.
+        public bool IsPinLabelVisible(Minimap.PinData pin) => pin != null && !ShouldHideLabel(pin);
 
         private static void SetHiddenByAlpha(GameObject go, bool hide)
         {
