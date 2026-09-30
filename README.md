@@ -127,7 +127,7 @@ server, when you pass by).
 3. Drop it into `<Valheim install folder>\BepInEx\plugins\AutoWaypoints\`.
 4. Launch the game and walk around - pins appear as you go.
 
-The config file `BepInEx\config\com.michal.valheim.autowaypoints.cfg` holds
+The config file `BepInEx\config\com.ab5olutezer0.valheim.autowaypoints.cfg` holds
 the starting settings for new characters (changes made in the game are saved
 per character, not to this file). Everything else
 is kept in `BepInEx\config\AutoWaypoints\`, so updating the mod with a mod

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7
+- Settings file renamed to `com.ab5olutezer0.valheim.autowaypoints.cfg`. Your old settings are moved over automatically.
+- New: the game log shows the name of places the mod does not know yet, so they can be added later.
+
 ## 1.0.6
 - Bug fix: the scan radius is saved again (it was reset after a restart). It is now saved per character, like the other settings.
 

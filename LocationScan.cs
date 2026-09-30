@@ -83,9 +83,30 @@ namespace AutoWaypoints
                     continue;
                 var zdo = locObj.GetComponent<ZNetView>()?.GetZDO();
                 int locationHash = zdo != null ? zdo.GetInt(ZDOVars.s_location) : 0;
-                if (locationHash != 0)
+                if (locationHash == 0)
+                    continue;
+                if (DungeonLocationByHash.ContainsKey(locationHash) || _structureByLocationHash.ContainsKey(locationHash))
                     TrackLocation(locObj, locationHash, playerPos, MinPinSpacing);
+                else
+                    LogUnrecognizedLocation(locObj.transform.position, locationHash);
             }
+        }
+
+        // Lokacje bez wlasnej kategorii (drobne miejsca, ale tez nowe budowle z aktualizacji gry)
+        // - nazwa w logu raz na miejsce, zeby dalo sie je dopisac do listy.
+        private readonly HashSet<Vector2Int> _loggedUnrecognizedLocations = new HashSet<Vector2Int>();
+
+        private void LogUnrecognizedLocation(Vector3 pos, int locationHash)
+        {
+            if (!_loggedUnrecognizedLocations.Add(new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.z))))
+                return;
+            var locationsByHash = ZoneSystem.instance != null
+                ? LocationsByHashField.GetValue(ZoneSystem.instance) as Dictionary<int, ZoneSystem.ZoneLocation>
+                : null;
+            string name = locationsByHash != null && locationsByHash.TryGetValue(locationHash, out var zoneLocation)
+                ? zoneLocation.m_prefabName
+                : $"hash {locationHash}";
+            Log.LogInfo($"Nierozpoznana lokacja: {name} @ {pos}");
         }
     }
 }

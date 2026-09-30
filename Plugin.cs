@@ -23,9 +23,9 @@ namespace AutoWaypoints
     [BepInDependency(Jotunn.Main.ModGuid)]
     public partial class AutoWaypointsPlugin : BaseUnityPlugin
     {
-        public const string PluginGUID = "com.michal.valheim.autowaypoints";
+        public const string PluginGUID = "com.ab5olutezer0.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "1.0.6";
+        public const string PluginVersion = "1.0.7";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -264,12 +264,35 @@ namespace AutoWaypoints
         internal static AutoWaypointsPlugin Instance;
         private Harmony _harmony;
 
+        // Do wersji 1.0.6 identyfikator wtyczki zaczynal sie od "com.michal". Plik konfiguracji
+        // nosi nazwe identyfikatora, wiec stary plik przenosimy pod nowa nazwe - gracz nie traci
+        // ustawien. Wywolywane przed pierwszym Config.Bind.
+        private const string LegacyPluginGUID = "com.michal.valheim.autowaypoints";
+
+        private void MigrateLegacyConfig()
+        {
+            string legacyPath = System.IO.Path.Combine(Paths.ConfigPath, LegacyPluginGUID + ".cfg");
+            if (System.IO.File.Exists(Config.ConfigFilePath) || !System.IO.File.Exists(legacyPath))
+                return;
+            try
+            {
+                System.IO.File.Move(legacyPath, Config.ConfigFilePath);
+                Config.Reload();
+                Logger.LogInfo($"Przeniesiono ustawienia: {legacyPath} -> {Config.ConfigFilePath}");
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning($"Nie udalo sie przeniesc ustawien ({legacyPath}): {e}");
+            }
+        }
+
         private void Awake()
         {
             Log = Logger;
             // Gra prosi mody o ustawienie tej flagi: w menu pojawia sie napis, ze gra jest
             // zmodowana (Iron Gate wymaga oznaczania modow jako nieoficjalnych).
             Game.isModded = true;
+            MigrateLegacyConfig();
             Instance = this;
             BuildConfig();
             SetUpCharacterSettings();
