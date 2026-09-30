@@ -25,7 +25,7 @@ namespace AutoWaypoints
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "1.0.5";
+        public const string PluginVersion = "1.0.6";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -3497,6 +3497,8 @@ namespace AutoWaypoints
                 _scanRadius.Value = v;
                 labelText.text = $"Scan radius: {v:0} m";
             });
+            _scanRadiusSlider = slider;
+            _scanRadiusLabel = labelText;
 
             return y - MenuRowHeight - 20f;
         }

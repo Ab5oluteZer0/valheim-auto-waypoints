@@ -82,9 +82,9 @@ the game.
 
 **Per character:** map pins belong to a character, so everything tied to them
 is kept separately for each character - hidden pins and discovered categories
-per world, and the settings window (pin and label switches, **Show all pins**,
-**Show pin labels**, **Replace boss icons**, **Replace location icons**) per
-character. The scan radius is shared. A character that has no settings yet
+per world, and the whole settings window (pin and label switches, **Show all
+pins**, **Show pin labels**, **Replace boss icons**, **Replace location
+icons**, **Scan radius**) per character. A character that has no settings yet
 starts from the values in the config file.
 
 **No spoilers:** a category only shows up in the list once the mod has
@@ -128,7 +128,8 @@ server, when you pass by).
 4. Launch the game and walk around - pins appear as you go.
 
 The config file `BepInEx\config\com.michal.valheim.autowaypoints.cfg` holds
-the scan radius and the starting settings for new characters. Everything else
+the starting settings for new characters (changes made in the game are saved
+per character, not to this file). Everything else
 is kept in `BepInEx\config\AutoWaypoints\`, so updating the mod with a mod
 manager doesn't wipe it:
 

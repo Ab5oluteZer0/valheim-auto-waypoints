@@ -7,11 +7,11 @@ using UnityEngine.UI;
 
 namespace AutoWaypoints
 {
-    // Ustawienia pinow (przelaczniki kategorii i podpisow, "Show all pins", "Show pin labels",
-    // "Replace boss icons") sa zapisywane osobno dla kazdej postaci - piny mapy naleza do postaci.
-    // Plik konfiguracji BepInEx trzyma ustawienia startowe dla postaci, ktora nie ma jeszcze
-    // wlasnych (dlatego zmiany w grze nie sa do niego zapisywane). Promien skanu i opcje
-    // diagnostyczne zostaja wspolne - to ustawienia komputera, nie postaci.
+    // Ustawienia z okna ustawien (przelaczniki kategorii i podpisow, "Show all pins", "Show pin
+    // labels", "Replace boss icons", "Replace location icons", zasieg skanu) sa zapisywane osobno
+    // dla kazdej postaci. Plik konfiguracji BepInEx trzyma ustawienia startowe dla postaci, ktora
+    // nie ma jeszcze wlasnych (dlatego zmiany w grze nie sa do niego zapisywane). Opcje
+    // diagnostyczne zostaja wspolne.
     public partial class AutoWaypointsPlugin
     {
         [Serializable]
@@ -19,11 +19,21 @@ namespace AutoWaypoints
         {
             // Rownolegle listy prostych typow - JsonUtility gubi listy wlasnych klas.
             public List<string> Keys = new List<string>();
+            // Wartosci zapisane tak jak w pliku konfiguracji (tekst) - dowolny typ ustawienia.
+            public List<string> Serialized = new List<string>();
+            // Do 1.0.5 tylko przelaczniki (bool) - odczyt starych plikow.
             public List<bool> Values = new List<bool>();
         }
 
-        private readonly Dictionary<string, ConfigEntry<bool>> _characterEntries = new Dictionary<string, ConfigEntry<bool>>();
+        private static readonly HashSet<string> CharacterGeneralKeys = new HashSet<string>
+        {
+            "ShowAutoPins", "ReplaceBossAltars", "ReplaceLocationIcons", "ScanRadius"
+        };
+
+        private readonly Dictionary<string, ConfigEntryBase> _characterEntries = new Dictionary<string, ConfigEntryBase>();
         private readonly List<(Toggle Toggle, ConfigEntry<bool> Config)> _menuToggles = new List<(Toggle, ConfigEntry<bool>)>();
+        private Slider _scanRadiusSlider;
+        private Text _scanRadiusLabel;
         private string _characterSettingsPath;
         private bool _applyingCharacterSettings;
         private bool _characterSettingsDirty;
@@ -37,13 +47,9 @@ namespace AutoWaypoints
             foreach (var pair in Config)
             {
                 var entry = pair.Value;
-                if (!(entry is ConfigEntry<bool> flag))
-                    continue;
                 var section = entry.Definition.Section;
-                var key = entry.Definition.Key;
-                if (section == "Categories" || section == "Labels" ||
-                    key == "ShowAutoPins" || key == "ReplaceBossAltars" || key == "ReplaceLocationIcons")
-                    _characterEntries[EntryKey(entry)] = flag;
+                if (section == "Categories" || section == "Labels" || CharacterGeneralKeys.Contains(entry.Definition.Key))
+                    _characterEntries[EntryKey(entry)] = entry;
             }
             Config.Save();
             Config.SaveOnConfigSet = false;
@@ -66,17 +72,14 @@ namespace AutoWaypoints
                 if (File.Exists(_characterSettingsPath))
                 {
                     var data = JsonUtility.FromJson<CharacterSettingsFile>(File.ReadAllText(_characterSettingsPath));
-                    if (data?.Keys != null && data.Values != null && data.Keys.Count == data.Values.Count)
-                    {
-                        for (int i = 0; i < data.Keys.Count; i++)
-                            if (_characterEntries.TryGetValue(data.Keys[i], out var entry))
-                                entry.Value = data.Values[i];
-                    }
-                    else
+                    if (!ApplyCharacterSettings(data))
                     {
                         Log.LogWarning($"Plik ustawien postaci {_characterSettingsPath} jest uszkodzony - uzywam ustawien startowych.");
                         Config.Reload();
                     }
+                    // Plik z wersji sprzed zapisu wszystkich typow (bez zasiegu skanu) - uzupelnienie.
+                    if (data?.Serialized == null || data.Serialized.Count != data.Keys?.Count)
+                        _characterSettingsDirty = true;
                 }
                 else
                 {
@@ -96,8 +99,33 @@ namespace AutoWaypoints
             foreach (var (toggle, config) in _menuToggles)
                 if (toggle != null)
                     toggle.SetIsOnWithoutNotify(config.Value);
+            if (_scanRadiusSlider != null)
+                _scanRadiusSlider.SetValueWithoutNotify(_scanRadius.Value);
+            if (_scanRadiusLabel != null)
+                _scanRadiusLabel.text = $"Scan radius: {_scanRadius.Value:0} m";
             _categoryListDirty = true;
             ApplyLabelVisibilityToAllPins();
+        }
+
+        private bool ApplyCharacterSettings(CharacterSettingsFile data)
+        {
+            if (data?.Keys == null)
+                return false;
+            if (data.Serialized != null && data.Serialized.Count == data.Keys.Count)
+            {
+                for (int i = 0; i < data.Keys.Count; i++)
+                    if (_characterEntries.TryGetValue(data.Keys[i], out var entry))
+                        entry.SetSerializedValue(data.Serialized[i]);
+                return true;
+            }
+            if (data.Values != null && data.Values.Count == data.Keys.Count)
+            {
+                for (int i = 0; i < data.Keys.Count; i++)
+                    if (_characterEntries.TryGetValue(data.Keys[i], out var entry) && entry is ConfigEntry<bool> flag)
+                        flag.Value = data.Values[i];
+                return true;
+            }
+            return false;
         }
 
         private void SaveCharacterSettingsIfDirty()
@@ -111,11 +139,11 @@ namespace AutoWaypoints
                 foreach (var kv in _characterEntries)
                 {
                     data.Keys.Add(kv.Key);
-                    data.Values.Add(kv.Value.Value);
+                    data.Serialized.Add(kv.Value.GetSerializedValue());
                 }
                 string json = JsonUtility.ToJson(data);
                 var check = JsonUtility.FromJson<CharacterSettingsFile>(json);
-                if (check?.Keys == null || check.Keys.Count != data.Keys.Count || check.Values.Count != data.Values.Count)
+                if (check?.Keys == null || check.Keys.Count != data.Keys.Count || check.Serialized?.Count != data.Serialized.Count)
                 {
                     Log.LogError($"Zapis ustawien postaci: serializacja zgubila dane ('{json}') - NIE nadpisuje pliku.");
                     return;
