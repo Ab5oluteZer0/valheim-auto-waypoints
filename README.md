@@ -180,6 +180,10 @@ The build automatically copies the built DLL into
   fortresses) are different: their buildings are separate network objects, not
   under the proxy - so the mod keeps its own list of loaded proxies and checks
   them by distance instead of relying on what the scan happens to hit.
+- Loose ruins (clusters of generic building pieces) are only pinned away from
+  known locations: the walls of a Fuling tower or a village used to be picked
+  up as extra "Ruins" pins on top of the location's own pin. Such leftover pins
+  are removed when you pass by the location.
 - Two map pins that look the same can be different places in the game data
   (e.g. three "Charred Tower Ruins" shapes); an icon can be set per location
   variant (`Icons/<category>__<location>.png`).

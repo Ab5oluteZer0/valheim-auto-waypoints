@@ -25,7 +25,7 @@ namespace AutoWaypoints
     {
         public const string PluginGUID = "com.michal.valheim.autowaypoints";
         public const string PluginName = "Auto Waypoints";
-        public const string PluginVersion = "1.0.4";
+        public const string PluginVersion = "1.0.5";
 
         private const float ScanInterval = 1.5f;
         // "od stop do glowy postaci" - waskie okno pionowe, zeby nie wylapywac zloz
@@ -1724,12 +1724,14 @@ namespace AutoWaypoints
                 }
                 if (!_tracked.Values.Any(t => t.Pin == existingDungeonPin))
                     _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = existingDungeonPin, Category = dungeonCategory };
+                RemoveLooseRuinPinsNear(locObj.transform.position, existingDungeonPin);
                 return;
             }
 
             var dungeonPin = CreatePinForFind(dungeonCategory, locObj.transform.position, dungeonInfo.PinType, dungeonInfo.DisplayName, dungeonIcon);
             _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = dungeonPin, Category = dungeonCategory };
             Log.LogInfo($"Auto-pin dodany: {dungeonInfo.DisplayName} @ {locObj.transform.position}");
+            RemoveLooseRuinPinsNear(locObj.transform.position, dungeonPin);
         }
 
         private void TrackStructureLocation(GameObject locObj, ResourceCategory category, Vector3 playerPos)
@@ -1752,9 +1754,11 @@ namespace AutoWaypoints
                 if (!_tracked.Values.Any(t => t.Pin == existingPin))
                     _tracked[locObj] = new TrackedResource { Obj = locObj, Pin = existingPin, Category = category };
                 ReapplyIcon(existingPin, category, locObj, null, category.DisplayName);
+                RemoveLooseRuinPinsNear(pos, existingPin);
                 return;
             }
             AddResourcePin(locObj, category, category.DisplayName, null);
+            RemoveLooseRuinPinsNear(pos, _tracked.TryGetValue(locObj, out var added) ? added.Pin : null);
         }
 
         // Pin portalu w poblizu - z rejestru pozycji albo (dawne piny) po nazwie "Portal: ...",
@@ -2055,6 +2059,11 @@ namespace AutoWaypoints
             }
 
             Vector3 pos = root.transform.position;
+
+            // Mury lokacji, ktora mod rozpoznaje (wieza Fulingow, ruina, wioska...) - ma ona wlasny
+            // pin, a jej kawalki jako "luzne ruiny" dawaly dodatkowe, nakladajace sie piny.
+            if (IsNearKnownLocation(pos))
+                return;
 
             var cluster = _ruinClusters.FirstOrDefault(cl => Vector3.Distance(cl.Center, pos) < RuinClusterRadius);
             if (cluster == null)
@@ -2452,11 +2461,14 @@ namespace AutoWaypoints
             ReapplyAllKnownPinIcons();
         }
 
-        private void RemoveHiddenRecordsNear(ResourceCategory category, Vector3 pos, float radius)
+        // keep: pin, ktorego ukryty wpis zostaje (np. schowany pin samej lokacji).
+        private void RemoveHiddenRecordsNear(ResourceCategory category, Vector3 pos, float radius, Minimap.PinData keep = null)
         {
             if (category == null || !_hiddenPins.TryGetValue(category.Key, out var list))
                 return;
-            if (list.RemoveAll(r => Vector3.Distance(new Vector3(r.X, r.Y, r.Z), pos) < radius) == 0)
+            bool IsKept(HiddenPinRecord r) =>
+                keep != null && r.DisplayName == keep.m_name && Vector3.Distance(new Vector3(r.X, r.Y, r.Z), keep.m_pos) < 0.5f;
+            if (list.RemoveAll(r => Vector3.Distance(new Vector3(r.X, r.Y, r.Z), pos) < radius && !IsKept(r)) == 0)
                 return;
             if (list.Count == 0)
                 _hiddenPins.Remove(category.Key);
